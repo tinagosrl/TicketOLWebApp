@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Models\Ticket;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -18,16 +19,26 @@ class PdfController extends Controller
         }
 
         $ticket->load(['order', 'ticketType.event.venue']);
+        
+        // Wrap single ticket in collection for view compatibility
+        $tickets = collect([$ticket]);
 
-        // QR Content: Ticket ID + Secret (In real app, add a hash or UUID)
-        $qrContent = json_encode([
-            'id' => $ticket->id,
-            'ref' => $ticket->order->reference_no,
-            'ts' => now()->timestamp
-        ]);
-
-        $pdf = Pdf::loadView('pdfs.ticket_pdf', compact('ticket', 'qrContent'));
+        $pdf = Pdf::loadView('pdfs.ticket_pdf', compact('tickets'));
 
         return $pdf->download("ticket-{$ticket->order->reference_no}-{$ticket->id}.pdf");
+    }
+
+    public function downloadOrder(Request $request, Order $order)
+    {
+         // Security check: Ensure signed URL
+         if (! $request->hasValidSignature()) {
+            abort(403, 'Invalid or expired URL.');
+        }
+
+        $tickets = $order->tickets()->with(['ticketType.event.venue', 'order'])->get();
+
+        $pdf = Pdf::loadView('pdfs.ticket_pdf', compact('tickets'));
+
+        return $pdf->download("order-{$order->reference_no}-tickets.pdf");
     }
 }

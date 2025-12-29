@@ -84,3 +84,7 @@ use App\Http\Controllers\Public\PdfController;
 Route::get('/tickets/{ticket}/download', [PdfController::class, 'download'])
     ->name('tickets.download')
     ->middleware('signed');
+
+Route::get('/orders/{order}/download-tickets', [PdfController::class, 'downloadOrder'])
+    ->name('orders.download.tickets')
+    ->middleware('signed');

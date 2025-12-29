@@ -23,6 +23,13 @@
             </div>
 
             <div class="border-t border-b border-gray-200 py-6">
+                <!-- Download All Button -->
+                <div class="mb-6 flex justify-center">
+                    <a href="{{ URL::signedRoute('orders.download.tickets', $order) }}" target="_blank" class="w-full text-center px-4 py-3 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 shadow-md transition-all">
+                        📄 Download All Tickets (PDF)
+                    </a>
+                </div>
+
                 <div class="flex justify-between items-center mb-4">
                     <span class="text-sm font-medium text-gray-500">Order Ref:</span>
                     <span class="text-lg font-bold text-gray-900">{{ $order->reference_no }}</span>
@@ -37,12 +44,9 @@
                             </div>
                             <div class="text-right">
                                 <span class="font-medium text-gray-900">€ {{ number_format($item->price * $item->quantity, 2) }}</span>
-                                <div class="mt-2 flex flex-col space-y-1">
-                                    @foreach($item->tickets as $ticket)
-                                        <a href="{{ URL::signedRoute('tickets.download', $ticket) }}" target="_blank" class="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none">
-                                            Download Ticket #{{ $ticket->id }}
-                                        </a>
-                                    @endforeach
+                                <div class="mt-2">
+                                     <!-- Optional: Individual download links if needed, but primary is the big button above -->
+                                     <span class="text-xs text-gray-400">Includes {{ $item->quantity }} ticket(s)</span>
                                 </div>
                             </div>
                         </div>
@@ -56,7 +60,7 @@
             </div>
 
             <div>
-                <a href="{{ route('public.shop.index', $tenant->domain) }}" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <a href="{{ route('public.shop.index', $tenant->domain) }}" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-indigo-600 bg-white hover:bg-gray-50 border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                     Back to Shop
                 </a>
             </div>
