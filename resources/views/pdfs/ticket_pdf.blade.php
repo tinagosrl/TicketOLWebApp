@@ -49,7 +49,7 @@
                                     'ts' => $ticket->created_at->timestamp
                                 ]);
                             @endphp
-                            <img src="data:image/png;base64, {{ base64_encode(QrCode::format('png')->size(150)->generate($qrContent)) }} ">
+                            <img src="data:image/svg+xml;base64, {{ base64_encode(QrCode::format('svg')->size(150)->generate($qrContent)) }} ">
                         </div>
                         <div style="font-size: 10px; margin-top: 5px;">{{ $ticket->unique_code ?? $ticket->id }}</div>
                     </div>
