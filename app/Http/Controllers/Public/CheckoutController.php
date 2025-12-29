@@ -53,20 +53,30 @@ class CheckoutController extends Controller
         // Create Order
         $order = Order::create([
             'tenant_id' => $tenant->id,
-            'reference_no' => strtoupper(Str::random(10)), // Simple ref
+            'reference_no' => 'ORD-' . now()->format('Ym') . '-' . strtoupper(Str::random(4)) . '-' . strtoupper(Str::random(4)),
             'customer_name' => $validated['customer_name'],
             'customer_email' => $validated['customer_email'],
             'total_amount' => $totalAmount,
             'status' => 'paid', // Simulating successful payment
         ]);
 
-        // Create Items
-        foreach ($itemsToCreate as $item) {
-            $order->items()->create($item);
+        // Create Items and Tickets
+        foreach ($itemsToCreate as $itemData) {
+            $item = $order->items()->create($itemData);
+
+            // Create individual tickets
+            for ($i = 0; $i < $itemData["quantity"]; $i++) {
+                \App\Models\Ticket::create([
+                    "order_id" => $order->id,
+                    "order_item_id" => $item->id,
+                    "ticket_type_id" => $itemData["ticket_type_id"],
+                    "unique_code" => Str::upper(Str::random(12)),
+                ]);
+            }
             
             // Update sold count
-            $ticketType = TicketType::find($item['ticket_type_id']);
-            $ticketType->increment('sold', $item['quantity']);
+            $ticketType = TicketType::find($itemData['ticket_type_id']);
+            $ticketType->increment('sold', $itemData['quantity']);
         }
 
         return redirect()->route('public.shop.checkout.success', ['domain' => $domain, 'reference' => $order->reference_no]);

@@ -28,25 +28,23 @@
                     <span class="text-lg font-bold text-gray-900">{{ $order->reference_no }}</span>
                 </div>
                 
-                <div class="flex justify-center mb-6">
-                     <!-- Fake QR Code -->
-                    <div class="bg-gray-800 p-4 rounded-lg">
-                        <div class="w-32 h-32 bg-white grid grid-cols-6 grid-rows-6 gap-0.5 p-1">
-                            @for ($i = 0; $i < 36; $i++)
-                                <div class="{{ rand(0,1) ? 'bg-black' : 'bg-transparent' }}"></div>
-                            @endfor
-                        </div>
-                    </div>
-                </div>
-
                 <div class="space-y-4">
                     @foreach($order->items as $item)
-                        <div class="flex justify-between text-sm">
+                        <div class="flex justify-between text-sm items-start">
                             <div>
                                 <span class="font-bold text-gray-900">{{ $item->quantity }}x {{ $item->ticketType->name }}</span>
                                 <div class="text-xs text-gray-500">{{ $item->ticketType->event->name }}</div>
                             </div>
-                            <span class="font-medium text-gray-900">€ {{ number_format($item->price * $item->quantity, 2) }}</span>
+                            <div class="text-right">
+                                <span class="font-medium text-gray-900">€ {{ number_format($item->price * $item->quantity, 2) }}</span>
+                                <div class="mt-2 flex flex-col space-y-1">
+                                    @foreach($item->tickets as $ticket)
+                                        <a href="{{ URL::signedRoute('tickets.download', $ticket) }}" target="_blank" class="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none">
+                                            Download Ticket #{{ $ticket->id }}
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
                         </div>
                     @endforeach
                 </div>

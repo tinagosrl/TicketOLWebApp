@@ -78,3 +78,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+use App\Http\Controllers\Public\PdfController;
+
+Route::get('/tickets/{ticket}/download', [PdfController::class, 'download'])
+    ->name('tickets.download')
+    ->middleware('signed');
