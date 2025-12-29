@@ -9,25 +9,16 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 
 class TicketsExport implements FromCollection, WithHeadings, WithMapping
 {
-    protected $tenant;
-    protected $request;
+    protected $tickets;
 
-    public function __construct($tenant, $request)
+    public function __construct($tickets)
     {
-        $this->tenant = $tenant;
-        $this->request = $request;
+        $this->tickets = $tickets;
     }
 
     public function collection()
     {
-        // Re-use logic from Controller (simplified duplicate for now, ideally in Service)
-        $query = Ticket::whereHas("order", function ($q) {
-            $q->where("tenant_id", $this->tenant->id)->where("status", "paid");
-        })->with(["order", "ticketType", "ticketType.event"]);
-
-        // Apply filters if needed, based on request (simplified for now to match basic export)
-        
-        return $query->get();
+        return $this->tickets;
     }
 
     public function map($ticket): array

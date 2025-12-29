@@ -9,46 +9,65 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             
             <!-- Tabs & Search -->
-            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                <div class="flex space-x-1 bg-gray-200 p-1 rounded-lg">
-                    <a href="{{ route('tenant.tickets.index', ['tab' => 'active']) }}" 
-                       class="px-4 py-2 rounded-md text-sm font-medium {{ $tab == 'active' ? 'bg-white text-gray-900 shadow' : 'text-gray-500 hover:text-gray-700' }}">
-                        {{ __('Active') }}
-                    </a>
-                    <a href="{{ route('tenant.tickets.index', ['tab' => 'validated']) }}" 
-                       class="px-4 py-2 rounded-md text-sm font-medium {{ $tab == 'validated' ? 'bg-white text-gray-900 shadow' : 'text-gray-500 hover:text-gray-700' }}">
-                        {{ __('Validated') }}
-                    </a>
-                    <a href="{{ route('tenant.tickets.index', ['tab' => 'archive']) }}" 
-                       class="px-4 py-2 rounded-md text-sm font-medium {{ $tab == 'archive' ? 'bg-white text-gray-900 shadow' : 'text-gray-500 hover:text-gray-700' }}">
-                        {{ __('Archive') }}
-                    </a>
-                    <a href="{{ route('tenant.tickets.index', ['tab' => 'logs']) }}" 
-                       class="px-4 py-2 rounded-md text-sm font-medium {{ $tab == 'logs' ? 'bg-white text-gray-900 shadow' : 'text-gray-500 hover:text-gray-700' }}">
-                        {{ __('Logs') }}
-                    </a>
-                </div>
-
-                @if($tab !== 'logs')
-                <div class="flex space-x-2">
-                    <a href="{{ route("tenant.tickets.export", array_merge(request()->query(), ['format' => 'csv'])) }}" class="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700">
-                        {{ __('Export CSV') }}
-                    </a>
-                    <a href="{{ route("tenant.tickets.export", array_merge(request()->query(), ['format' => 'excel'])) }}" class="bg-green-800 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-900 mr-2">
-                        Export Excel
-                    </a>
-                </div>
-                <form action="{{ route('tenant.tickets.index') }}" method="GET" class="w-full md:w-auto">
-                    <input type="hidden" name="tab" value="{{ $tab }}">
-                    <div class="relative">
-                        <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('Search') }}..." 
-                               class="w-full md:w-64 pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-white p-4 rounded-lg shadow-sm">
+                 <div class="flex flex-col gap-2 w-full">
+                    <!-- Top Row: Tabs -->
+                    <div class="flex space-x-1 bg-gray-100 p-1 rounded-lg w-fit">
+                        <a href="{{ route('tenant.tickets.index', ['tab' => 'active']) }}" 
+                           class="px-4 py-2 rounded-md text-sm font-medium {{ $tab == 'active' ? 'bg-white text-gray-900 shadow' : 'text-gray-500 hover:text-gray-700' }}">
+                            {{ __('Active') }}
+                        </a>
+                        <a href="{{ route('tenant.tickets.index', ['tab' => 'validated']) }}" 
+                           class="px-4 py-2 rounded-md text-sm font-medium {{ $tab == 'validated' ? 'bg-white text-gray-900 shadow' : 'text-gray-500 hover:text-gray-700' }}">
+                            {{ __('Validated') }}
+                        </a>
+                        <a href="{{ route('tenant.tickets.index', ['tab' => 'archive']) }}" 
+                           class="px-4 py-2 rounded-md text-sm font-medium {{ $tab == 'archive' ? 'bg-white text-gray-900 shadow' : 'text-gray-500 hover:text-gray-700' }}">
+                            {{ __('Archive') }}
+                        </a>
+                        <a href="{{ route('tenant.tickets.index', ['tab' => 'logs']) }}" 
+                           class="px-4 py-2 rounded-md text-sm font-medium {{ $tab == 'logs' ? 'bg-white text-gray-900 shadow' : 'text-gray-500 hover:text-gray-700' }}">
+                            {{ __('Logs') }}
+                        </a>
                     </div>
-                </form>
-                @endif
+                
+                    <!-- Bottom Row: Filters & Actions -->
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mt-2">
+                        <form action="{{ route('tenant.tickets.index') }}" method="GET" class="flex flex-col md:flex-row gap-4 w-full md:w-auto items-end md:items-center">
+                            <input type="hidden" name="tab" value="{{ $tab }}">
+                            
+                            <!-- Search -->
+                            <div class="relative w-full md:w-64">
+                                <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('Search') }}..." 
+                                       class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+
+                            <!-- Date Filters -->
+                             <div class="flex space-x-2">
+                                <div class="relative">
+                                     <input type="date" name="date_from" value="{{ $dateFrom }}" class="border rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm" placeholder="From">
+                                </div>
+                                <div class="relative">
+                                     <input type="date" name="date_to" value="{{ $dateTo }}" class="border rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm" placeholder="To">
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-700">Filter</button>
+                        </form>
+
+                        <div class="flex space-x-2">
+                            <a href="{{ route("tenant.tickets.export", array_merge(request()->query(), ['format' => 'csv'])) }}" class="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700">
+                                {{ __('Export CSV') }}
+                            </a>
+                            <a href="{{ route("tenant.tickets.export", array_merge(request()->query(), ['format' => 'excel'])) }}" class="bg-green-800 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-900">
+                                Export Excel
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Content -->
@@ -111,7 +130,7 @@
                             </div>
                         @endif
                     @else
-                        @if($tickets->count() > 0)
+                        @if($tickets && $tickets->count() > 0)
                             <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">
                                     <thead>
