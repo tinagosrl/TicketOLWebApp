@@ -88,3 +88,4 @@ Route::get('/tickets/{ticket}/download', [PdfController::class, 'download'])
 Route::get('/orders/{order}/download-tickets', [PdfController::class, 'downloadOrder'])
     ->name('orders.download.tickets')
     ->middleware('signed');
+        Route::post("/tickets/{ticket}/unvalidate", [TicketController::class, "unvalidateTicket"])->name("tenant.tickets.unvalidate");

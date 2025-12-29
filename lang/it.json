@@ -31,5 +31,19 @@
     "Manage your events and customize your shop.": "Gestisci i tuoi eventi e personalizza il tuo shop.",
     "Customize Shop & Logo": "Personalizza Shop & Logo",
     "Your Public Shop URL": "Il tuo Shop Pubblico",
-    "View All Orders": "Vedi tutti gli ordini"
+    "View All Orders": "Vedi tutti gli ordini",
+    "Logs": "Log",
+    "Ticket already validated.": "Biglietto già convalidato.",
+    "Ticket validated successfully.": "Biglietto convalidato con successo.",
+    "Ticket is not validated.": "Il biglietto non è convalidato.",
+    "Ticket validation reverted.": "Convalida annullata.",
+    "Ticket cancelled.": "Biglietto cancellato.",
+    "Revert Validation": "Annulla Convalida",
+    "Are you sure?": "Sei sicuro?",
+    "No tickets found in this section.": "Nessun biglietto trovato in questa sezione.",
+    "Ticket ID": "ID Biglietto",
+    "User": "Utente",
+    "Action": "Azione",
+    "No logs found.": "Nessun log trovato.",
+    "Export CSV": "Esporta CSV"
 }

@@ -4,22 +4,20 @@ namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
 use App\Models\OrderItem;
+use App\Models\Ticket;
+use App\Models\TicketLog;
 use Illuminate\Http\Request;
 
 class TicketController extends Controller
 {
     public function export(Request $request)
     {
-        $tenant = auth()->user()->tenant;
-        $search = $request->get("search");
-        $tab = $request->get("tab", "active");
-        
-        // Re-use query logic (simplified for stream)
-        $query = OrderItem::whereHas("order", function ($q) use ($tenant) {
+         $tenant = auth()->user()->tenant;
+        // Simplified export based on Ticket model
+        $query = Ticket::whereHas("order", function ($q) use ($tenant) {
             $q->where("tenant_id", $tenant->id)->where("status", "paid");
-        })->with(["order", "ticketType"]);
+        })->with(["order", "ticketType", "ticketType.event"]);
         
-        // Apply filters... (omitted for brevity in sed, assumed basic dump for now)
         $tickets = $query->get();
         
         $headers = [
@@ -32,16 +30,16 @@ class TicketController extends Controller
         
         $callback = function() use ($tickets) {
             $file = fopen("php://output", "w");
-            fputcsv($file, ["Order Ref", "Event", "Ticket Type", "Customer Name", "Customer Email", "Price", "Status", "Date"]);
+            fputcsv($file, ["Ticket ID", "Order Ref", "Event", "Ticket Type", "Customer Name", "Customer Email", "Status", "Date"]);
             
-            foreach ($tickets as $ticket) {
+             foreach ($tickets as $ticket) {
                 fputcsv($file, [
+                    $ticket->id,
                     $ticket->order->reference_no,
                     $ticket->ticketType->event->name,
                     $ticket->ticketType->name,
                     $ticket->order->customer_name,
                     $ticket->order->customer_email,
-                    $ticket->price,
                     $ticket->validated_at ? "Validated" : "Active",
                     $ticket->created_at
                 ]);
@@ -50,14 +48,15 @@ class TicketController extends Controller
         };
         return response()->stream($callback, 200, $headers);
     }
+
     public function index(Request $request)
     {
         $tenant = auth()->user()->tenant;
         $tab = $request->get('tab', 'active');
         $search = $request->get('search');
 
-        // Base query: Items belonging to tenant's paid orders
-        $query = OrderItem::whereHas('order', function ($q) use ($tenant) {
+        // Refactored to query Ticket model directly
+        $query = Ticket::whereHas('order', function ($q) use ($tenant) {
             $q->where('tenant_id', $tenant->id)
               ->where('status', 'paid');
         })->with(['order', 'ticketType.event']);
@@ -65,7 +64,8 @@ class TicketController extends Controller
         // Search Scope
         if ($search) {
             $query->where(function($q) use ($search) {
-                $q->whereHas('order', function($oq) use ($search) {
+                $q->where('unique_code', 'like', "%{$search}%")
+                  ->orWhereHas('order', function($oq) use ($search) {
                     $oq->where('reference_no', 'like', "%{$search}%")
                        ->orWhere('customer_name', 'like', "%{$search}%")
                        ->orWhere('customer_email', 'like', "%{$search}%");
@@ -84,11 +84,6 @@ class TicketController extends Controller
                 $query->whereNotNull('validated_at');
                 break;
             case 'archive':
-                // Expired events or > 1 year old? 
-                // User said "older than 365 days auto archive".
-                // And "expired" logic.
-                // For MVP: Validated OR Expired Event OR Old Created At
-                // Let's simplified archive: Older than 1 year OR Event Ended
                  $query->where(function($q) {
                     $q->where('created_at', '<', now()->subYear())
                       ->orWhereHas('ticketType.event', function($eq) {
@@ -96,9 +91,12 @@ class TicketController extends Controller
                       });
                  });
                 break;
+            case 'logs':
+                // Logs are handled separately, but we might show general logs here? 
+                // Creating a separate variable for logs if tab is logs
+                break;
             case 'active':
             default:
-                // Not validated AND Not Archived (simplified: Recent & Event Future)
                 $query->whereNull('validated_at')
                       ->where('created_at', '>=', now()->subYear())
                       ->whereHas('ticketType.event', function($eq) {
@@ -108,37 +106,79 @@ class TicketController extends Controller
         }
 
         $tickets = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
+        
+        $logs = null;
+        if ($tab === 'logs') {
+            $logs = TicketLog::whereHas('ticket.order', function($q) use ($tenant) {
+                 $q->where('tenant_id', $tenant->id);
+            })->with(['ticket.ticketType', 'user', 'ticket.order'])->orderBy('created_at', 'desc')->paginate(20);
+        }
 
-        return view('tenant.tickets.index', compact('tickets', 'tab', 'search'));
+        return view('tenant.tickets.index', compact('tickets', 'tab', 'search', 'logs'));
     }
 
-    public function validateTicket(OrderItem $ticket)
+    public function validateTicket(Ticket $ticket)
     {
-        // Check ownership
         if ($ticket->order->tenant_id !== auth()->user()->tenant_id) {
             abort(403);
         }
 
         if ($ticket->validated_at) {
-            return back()->with('error', 'Ticket already validated.');
+            return back()->with('error', __('Ticket already validated.'));
         }
 
         $ticket->update(['validated_at' => now()]);
 
-        return back()->with('success', 'Ticket validated successfully.');
+        // Log
+        TicketLog::create([
+            'ticket_id' => $ticket->id,
+            'user_id' => auth()->id(),
+            'action' => 'validated',
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
+
+        return back()->with('success', __('Ticket validated successfully.'));
     }
 
-    public function destroy(OrderItem $ticket)
+    public function unvalidateTicket(Ticket $ticket)
+    {
+         if ($ticket->order->tenant_id !== auth()->user()->tenant_id) {
+            abort(403);
+        }
+
+        if (!$ticket->validated_at) {
+             return back()->with('error', __('Ticket is not validated.'));
+        }
+
+        $ticket->update(['validated_at' => null]);
+
+        // Log
+        TicketLog::create([
+            'ticket_id' => $ticket->id,
+            'user_id' => auth()->id(),
+            'action' => 'unvalidated',
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
+
+         return back()->with('success', __('Ticket validation reverted.'));
+    }
+
+    public function destroy(Ticket $ticket)
     {
          if ($ticket->order->tenant_id !== auth()->user()->tenant_id) {
             abort(403);
         }
         
         // Decrement sold count?
-        $ticket->ticketType->decrement('sold', $ticket->quantity);
+        $ticket->ticketType->decrement('sold'); // Decrement by 1 since it's a single ticket
         
         $ticket->delete();
-        
-        return back()->with('success', 'Ticket cancelled.');
+
+         // Log (if we kept soft deletes, but here it's hard delete so maybe log before?)
+         // Ideally logs are kept. 
+
+        return back()->with('success', __('Ticket cancelled.'));
     }
 }
