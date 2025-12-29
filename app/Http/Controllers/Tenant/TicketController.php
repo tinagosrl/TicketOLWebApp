@@ -3,16 +3,23 @@
 namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
-use App\Models\OrderItem;
 use App\Models\Ticket;
 use App\Models\TicketLog;
 use Illuminate\Http\Request;
+use App\Exports\TicketsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TicketController extends Controller
 {
     public function export(Request $request)
     {
-         $tenant = auth()->user()->tenant;
+        $tenant = auth()->user()->tenant;
+        
+        if ($request->get('format') === 'excel') {
+            return Excel::download(new TicketsExport($tenant, $request), 'tickets.xlsx');
+        }
+
+        // CSV Export (Existing Logic - simplified)
         // Simplified export based on Ticket model
         $query = Ticket::whereHas("order", function ($q) use ($tenant) {
             $q->where("tenant_id", $tenant->id)->where("status", "paid");

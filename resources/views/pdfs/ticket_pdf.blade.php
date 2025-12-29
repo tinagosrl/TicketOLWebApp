@@ -64,6 +64,11 @@
                     Generated on / Generato il: {{ now()->format('d/m/Y H:i') }}
                     <br>
                     Please present this ticket at the entrance / Si prega di presentare questo biglietto all'ingresso
+                    <br><br>
+                    <div style="width: 100%; text-align: center;">
+                        <img src="{{ public_path('images/ticketol_logo.png') }}" style="height: 30px; vertical-align: middle; margin-right: 10px; display: inline-block;">
+                        <span style="vertical-align: middle; font-size: 11px; color: #555; display: inline-block;">Powered by <strong>TicketOL</strong> - <a href="https://www.ticketol.eu" style="color: #555; text-decoration: none;">www.ticketol.eu</a></span>
+                     </div>
                 </div>
             </div>
         </div>

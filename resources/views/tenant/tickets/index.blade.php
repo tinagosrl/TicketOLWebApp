@@ -30,9 +30,14 @@
                 </div>
 
                 @if($tab !== 'logs')
-                <a href="{{ route("tenant.tickets.export", request()->query()) }}" class="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 mr-2">
-                    {{ __('Export CSV') }}
-                </a>                
+                <div class="flex space-x-2">
+                    <a href="{{ route("tenant.tickets.export", array_merge(request()->query(), ['format' => 'csv'])) }}" class="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700">
+                        {{ __('Export CSV') }}
+                    </a>
+                    <a href="{{ route("tenant.tickets.export", array_merge(request()->query(), ['format' => 'excel'])) }}" class="bg-green-800 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-900 mr-2">
+                        Export Excel
+                    </a>
+                </div>
                 <form action="{{ route('tenant.tickets.index') }}" method="GET" class="w-full md:w-auto">
                     <input type="hidden" name="tab" value="{{ $tab }}">
                     <div class="relative">
