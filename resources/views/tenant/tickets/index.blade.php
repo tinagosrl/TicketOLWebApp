@@ -56,6 +56,7 @@
                             </div>
                             
                             <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-700">Filter</button>
+                            <a href="{{ route('tenant.tickets.index', ['tab' => $tab]) }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-300 flex items-center justify-center">Reset</a>
                         </form>
 
                         <div class="flex space-x-2">
