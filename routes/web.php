@@ -36,7 +36,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware([CheckSuperAdmin::class])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [SuperAdminDashboard::class, 'index'])->name('dashboard');
         Route::resource('plans', PlanController::class)->only(['index', 'edit', 'update']);
-        Route::get('tenants', function() { return 'Manage Tenants'; })->name('tenants.index');
+        Route::resource('tenants', \App\Http\Controllers\SuperAdmin\TenantController::class);
         Route::resource("email_templates", \App\Http\Controllers\SuperAdmin\EmailTemplateController::class);
         Route::get("branding", [\App\Http\Controllers\SuperAdmin\BrandingController::class, "edit"])->name("branding.edit");
         Route::patch("branding", [\App\Http\Controllers\SuperAdmin\BrandingController::class, "update"])->name("branding.update");
