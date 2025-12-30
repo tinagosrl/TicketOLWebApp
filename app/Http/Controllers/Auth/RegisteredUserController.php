@@ -25,7 +25,13 @@ class RegisteredUserController extends Controller
     public function create(): View
     {
         $plans = Plan::where('is_active', true)->orderBy('price_monthly')->get();
-        return view('auth.register', compact('plans'));
+
+        // Generate simple math challenge (1-10) for Anti-Bot
+        $num1 = rand(1, 10);
+        $num2 = rand(1, 10);
+        session(['captcha_result' => $num1 + $num2]);
+
+        return view('auth.register', compact('plans', 'num1', 'num2'));
     }
 
     /**
@@ -44,6 +50,12 @@ class RegisteredUserController extends Controller
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class, 'unique:'.Tenant::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'website_url' => ['nullable', 'size:0'], // Honeypot (must be empty)
+            'math_answer' => ['required', 'integer', function ($attribute, $value, $fail) {
+                if ($value != session('captcha_result')) {
+                    $fail(__('The math answer is incorrect. Are you human?'));
+                }
+            }],
         ]);
 
         return DB::transaction(function () use ($request) {
