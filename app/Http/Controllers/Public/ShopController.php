@@ -4,45 +4,42 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
-use App\Models\Tenant;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Carbon\Carbon;
 
 class ShopController extends Controller
 {
     /**
-     * Show the list of events for a specific tenant (subdomain).
+     * Display a listing of the resource.
      */
-    public function index($domain): View
+    public function index(Request $request)
     {
-        $tenant = Tenant::where('domain', $domain)->firstOrFail();
-
-        // Get upcoming published events
-        $events = $tenant->events()
-            ->where('is_published', true) // Assuming we add this flag or just show all for now
-            // ->where('start_date', '>=', now()) // Optional: hide past events
-            ->orderBy('start_date', 'asc')
-            ->get();
-            
-        // If we didn't migrate 'is_published' yet, just show all for demo
-        // Re-checking migration: schema had 'is_published' default false.
-        // So I need to make sure I verify publishing or ignore the flag for now.
-        // I will ignore the flag for the immediate verification to ensure the event shows up.
+        $tenant = $request->get('tenant'); // Injected by middleware or resolver
         
-        $events = $tenant->events()->orderBy('start_date', 'asc')->get();
+        $events = Event::with('venue')
+            ->where('tenant_id', $tenant->id)
+            ->where('start_date', '>=', now())
+            ->orderBy('start_date', 'asc')
+            ->paginate(9);
 
-        return view('public.shop.index', compact('tenant', 'events'));
+        return view('public.shop.index', compact('events', 'tenant'));
     }
 
-    public function show($domain, $slug): View
+    /**
+     * Display the specified resource.
+     */
+    public function show(Request $request, $slug)
     {
-        $tenant = Tenant::where('domain', $domain)->firstOrFail();
+        $tenant = $request->get('tenant');
         
-        $event = $tenant->events()
+        $event = Event::with(['venue', 'ticketTypes' => function($q) {
+                // Ensure only available ticket types or all
+                // $q->where('quantity', '>', 0); // Optional: Hide sold out
+            }])
+            ->where('tenant_id', $tenant->id)
             ->where('slug', $slug)
-            ->with(['venue', 'ticketTypes'])
             ->firstOrFail();
 
-        return view('public.shop.show', compact('tenant', 'event'));
+        return view('public.shop.show', compact('event', 'tenant'));
     }
 }

@@ -4,92 +4,99 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\Tenant;
+use App\Models\Ticket;
 use App\Models\TicketType;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
 {
-    public function store(Request $request, $domain)
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
     {
-        $tenant = Tenant::where('domain', $domain)->firstOrFail();
+        $tenant = $request->get('tenant');
+        $cart = Session::get('cart', []);
 
-        $validated = $request->validate([
+        if (empty($cart)) {
+            return redirect()->route('public.shop.index')->with('error', 'Your cart is empty.');
+        }
+
+        $request->validate([
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'required|email|max:255',
-            'tickets' => 'required|array',
-            'tickets.*' => 'integer|min:0',
         ]);
 
-        // Calculate total and validate availability
-        $totalAmount = 0;
-        $itemsToCreate = [];
+        try {
+            DB::beginTransaction();
 
-        foreach ($validated['tickets'] as $ticketId => $quantity) {
-            if ($quantity > 0) {
-                // Determine if this ticket belongs to an event of this tenant
-                // Ideally we check relation, for speed we just check existence
-                $ticketType = TicketType::findOrFail($ticketId);
+            $total = 0;
+            foreach ($cart as $item) {
+                $total += $item['price'] * $item['quantity'];
                 
-                // TODO: Verify ticket belongs to tenant's event
-                
-                $price = $ticketType->price;
-                $totalAmount += $price * $quantity;
-
-                $itemsToCreate[] = [
-                    'ticket_type_id' => $ticketType->id,
-                    'quantity' => $quantity,
-                    'price' => $price,
-                ];
+                // Verify availability again
+                $ticketType = TicketType::lockForUpdate()->find($item['id']);
+                if ($ticketType->quantity < $item['quantity']) {
+                    throw new \Exception("Not enough tickets available for {$ticketType->name}");
+                }
+                $ticketType->decrement('quantity', $item['quantity']);
+                $ticketType->increment('sold', $item['quantity']);
             }
-        }
 
-        if (empty($itemsToCreate)) {
-            return back()->withErrors(['tickets' => 'Please select at least one ticket.']);
-        }
+            $order = Order::create([
+                'tenant_id' => $tenant->id,
+                'reference_no' => 'ORD-' . strtoupper(Str::random(10)), // Simple ref for now
+                'customer_name' => $request->customer_name,
+                'customer_email' => $request->customer_email,
+                'total_amount' => $total,
+                'status' => 'paid', // Assuming instant payment or free for MVP
+            ]);
 
-        // Create Order
-        $order = Order::create([
-            'tenant_id' => $tenant->id,
-            'reference_no' => 'ORD-' . now()->format('Ym') . '-' . strtoupper(Str::random(4)) . '-' . strtoupper(Str::random(4)),
-            'customer_name' => $validated['customer_name'],
-            'customer_email' => $validated['customer_email'],
-            'total_amount' => $totalAmount,
-            'status' => 'paid', // Simulating successful payment
-        ]);
-
-        // Create Items and Tickets
-        foreach ($itemsToCreate as $itemData) {
-            $item = $order->items()->create($itemData);
-
-            // Create individual tickets
-            for ($i = 0; $i < $itemData["quantity"]; $i++) {
-                \App\Models\Ticket::create([
-                    "order_id" => $order->id,
-                    "order_item_id" => $item->id,
-                    "ticket_type_id" => $itemData["ticket_type_id"],
-                    "unique_code" => Str::upper(Str::random(12)),
+            foreach ($cart as $item) {
+                $orderItem = $order->items()->create([
+                    'ticket_type_id' => $item['id'],
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
                 ]);
-            }
-            
-            // Update sold count
-            $ticketType = TicketType::find($itemData['ticket_type_id']);
-            $ticketType->increment('sold', $itemData['quantity']);
-        }
 
-        return redirect()->route('public.shop.checkout.success', ['domain' => $domain, 'reference' => $order->reference_no]);
+                // Generate individual tickets
+                for ($i = 0; $i < $item['quantity']; $i++) {
+                    Ticket::create([
+                        'order_id' => $order->id,
+                        'order_item_id' => $orderItem->id,
+                        'ticket_type_id' => $item['id'],
+                        'unique_code' => Str::random(12),
+                    ]);
+                }
+            }
+
+            DB::commit();
+            Session::forget('cart');
+
+            // Send Email
+            Mail::to($order->customer_email)->send(new OrderConfirmation($order));
+
+            return redirect()->route('public.shop.checkout.success', $order->reference_no);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Checkout failed: ' . $e->getMessage());
+        }
     }
 
-    public function success($domain, $reference)
+    /**
+     * Display the success page.
+     */
+    public function success(Request $request, $reference)
     {
-         $tenant = Tenant::where('domain', $domain)->firstOrFail();
-         $order = Order::where('tenant_id', $tenant->id)
-             ->where('reference_no', $reference)
-             ->with(['items.ticketType.event'])
-             ->firstOrFail();
+        $tenant = $request->get('tenant');
+        $order = Order::where('reference_no', $reference)
+            ->where('tenant_id', $tenant->id)
+            ->firstOrFail();
 
-         return view('public.shop.success', compact('tenant', 'order'));
+        return view('public.checkout.success', compact('order', 'tenant'));
     }
 }

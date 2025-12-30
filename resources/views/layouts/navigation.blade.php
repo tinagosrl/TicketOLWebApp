@@ -12,44 +12,84 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
+                     @if(auth()->check() && auth()->user()->isSuperAdmin())
+                        {{-- SUPER ADMIN MENU --}}
+                        <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
+                            {{ __('Dashboard') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.tenants.index')" :active="request()->routeIs('admin.tenants.*')">
+                            {{ __('Tenants') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.plans.index')" :active="request()->routeIs('admin.plans.*')">
+                            {{ __('Plans') }}
+                        </x-nav-link>
+                         {{-- Global Settings Dropdown --}}
+                        <div class="hidden sm:flex sm:items-center sm:ms-6">
+                            <x-dropdown align="right" width="48">
+                                <x-slot name="trigger">
+                                    <button class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out">
+                                        <div>{{ __('Settings') }}</div>
+                                        <div class="ms-1">
+                                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                            </svg>
+                                        </div>
+                                    </button>
+                                </x-slot>
+                                <x-slot name="content">
+                                    <x-dropdown-link :href="route('admin.branding.edit')">
+                                        {{ __('Branding') }}
+                                    </x-dropdown-link>
+                                    <x-dropdown-link :href="route('admin.email_templates.index')">
+                                        {{ __('Email Templates') }}
+                                    </x-dropdown-link>
+                                     {{-- System Config --}}
+                                     <x-dropdown-link :href="route('admin.system_config.edit')">
+                                        {{ __('System Config') }}
+                                    </x-dropdown-link>
+                                </x-slot>
+                            </x-dropdown>
+                        </div>
 
-                    @if(auth()->user()->role === 'tenant_admin')
+                    @else
+                        {{-- TENANT MENU --}}
+                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                            {{ __('Dashboard') }}
+                        </x-nav-link>
+                        
+                        @if(auth()->check() && auth()->user()->role === 'tenant_admin')
                         <x-nav-link :href="route('tenant.team.index')" :active="request()->routeIs('tenant.team.*')">
                             {{ __('Team') }}
                         </x-nav-link>
+                        @endif
+
+                         <!-- Ticketing Dropdown -->
+                        <div class="hidden sm:flex sm:items-center sm:ms-6">
+                            <x-dropdown align="right" width="48">
+                                <x-slot name="trigger">
+                                    <button class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out">
+                                        <div>{{ __('Ticketing') }}</div>
+                                        <div class="ms-1">
+                                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                            </svg>
+                                        </div>
+                                    </button>
+                                </x-slot>
+                                <x-slot name="content">
+                                    <x-dropdown-link :href="route('tenant.venues.index')">
+                                        {{ __('Venues') }}
+                                    </x-dropdown-link>
+                                    <x-dropdown-link :href="route('tenant.events.index')">
+                                        {{ __('Events') }}
+                                    </x-dropdown-link>
+                                    <x-dropdown-link href="{{ route('tenant.tickets.index') }}">
+                                        {{ __('Orders & Tickets') }}
+                                    </x-dropdown-link>
+                                </x-slot>
+                            </x-dropdown>
+                        </div>
                     @endif
-                    
-                     <!-- Ticketing Dropdown -->
-                    <div class="hidden sm:flex sm:items-center sm:ms-6">
-                        <x-dropdown align="right" width="48">
-                            <x-slot name="trigger">
-                                <button class="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out">
-                                    <div>{{ __('Ticketing') }}</div>
-
-                                    <div class="ms-1">
-                                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
-                                </button>
-                            </x-slot>
-
-                            <x-slot name="content">
-                                <x-dropdown-link :href="route('tenant.venues.index')">
-                                    {{ __('Venues') }}
-                                </x-dropdown-link>
-                                <x-dropdown-link :href="route('tenant.events.index')">
-                                    {{ __('Events') }}
-                                </x-dropdown-link>
-                                <x-dropdown-link href="{{ route('tenant.tickets.index') }}">
-                                    {{ __('Orders & Tickets') }}
-                                </x-dropdown-link>
-                            </x-slot>
-                        </x-dropdown>
-                    </div>
                 </div>
             </div>
             
@@ -79,9 +119,11 @@
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
                         </x-dropdown-link>
+                        @if(auth()->check() && !auth()->user()->isSuperAdmin())
                         <x-dropdown-link :href="route('tenant.shop.settings.edit')">
                             {{ __('Shop Settings') }}
                         </x-dropdown-link>
+                        @endif
 
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
@@ -112,17 +154,32 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
-             @if(auth()->user()->role === 'tenant_admin')
-                <x-responsive-nav-link :href="route('tenant.team.index')" :active="request()->routeIs('tenant.team.*')">
-                    {{ __('Team') }}
+             @if(auth()->check() && auth()->user()->isSuperAdmin())
+                <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
+                    {{ __('Dashboard') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.tenants.index')" :active="request()->routeIs('admin.tenants.*')">
+                    {{ __('Tenants') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.plans.index')" :active="request()->routeIs('admin.plans.*')">
+                    {{ __('Plans') }}
+                </x-responsive-nav-link>
+                 <x-responsive-nav-link :href="route('admin.branding.edit')" :active="request()->routeIs('admin.branding.*')">
+                    {{ __('Branding') }}
+                </x-responsive-nav-link>
+             @else
+                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                    {{ __('Dashboard') }}
+                </x-responsive-nav-link>
+                 @if(auth()->user()->role === 'tenant_admin')
+                    <x-responsive-nav-link :href="route('tenant.team.index')" :active="request()->routeIs('tenant.team.*')">
+                        {{ __('Team') }}
+                    </x-responsive-nav-link>
+                @endif
+                 <x-responsive-nav-link :href="route('tenant.tickets.index')" :active="request()->routeIs('tenant.tickets.index')">
+                    {{ __('Orders & Tickets') }}
                 </x-responsive-nav-link>
             @endif
-             <x-responsive-nav-link :href="route('tenant.tickets.index')" :active="request()->routeIs('tenant.tickets.index')">
-                {{ __('Orders & Tickets') }}
-            </x-responsive-nav-link>
         </div>
 
         <!-- Responsive Settings Options -->
@@ -142,9 +199,11 @@
                 <x-responsive-nav-link :href="route('profile.edit')">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
+                 @if(auth()->check() && !auth()->user()->isSuperAdmin())
                  <x-responsive-nav-link :href="route('tenant.shop.settings.edit')">
                     {{ __('Shop Settings') }}
                 </x-responsive-nav-link>
+                @endif
 
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">

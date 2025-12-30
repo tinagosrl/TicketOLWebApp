@@ -10,8 +10,12 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index(): View
+    public function index()
     {
+        if (auth()->user()->isSuperAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+
         $tenant = auth()->user()->tenant;
 
         if (!$tenant) {

@@ -1,122 +1,88 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $event->name }} - {{ $tenant->name }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>
-        :root {
-            --primary-color: {{ $tenant->primary_color ?? "#4f46e5" }};
-        }
-        .text-primary { color: var(--primary-color); }
-        .text-primary:hover { opacity: 0.8; }
-        .btn-primary { background-color: var(--primary-color); color: white; }
-        .btn-primary:hover { opacity: 0.9; }
-        .focus-ring-primary:focus { --tw-ring-color: var(--primary-color); }
-    </style></head>
-<body class="bg-gray-100 font-sans antialiased">
-    <!-- Header -->
-    <header class="bg-white shadow">
-        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            <a href="{{ route('public.shop.index', $tenant->domain) }}" class="text-primary text-sm font-semibold mb-2 inline-block">&larr; Back to Events</a>
-            <h1 class="text-3xl font-bold text-gray-900">
-                {{ $tenant->name }}
-            </h1>
-        </div>
-    </header>
+<x-guest-layout>
+    <div class="py-12 bg-gray-50 min-h-screen">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="mb-6">
+                <a href="{{ route('public.shop.index') }}" class="text-indigo-600 hover:text-indigo-800 flex items-center">
+                    &larr; {{ __('Back to Events') }}
+                </a>
+            </div>
 
-    <main class="py-12">
-        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow-lg rounded-lg overflow-hidden flex flex-col md:flex-row">
-                <!-- Event Image & Info -->
-                <div class="md:w-1/2 p-0 bg-gray-50 relative">
-                     @if($event->image_path)
-                        <img src="{{ Storage::url($event->image_path) }}" alt="{{ $event->name }}" class="w-full h-64 md:h-full object-cover">
-                    @else
-                        <div class="w-full h-64 md:h-full flex items-center justify-center text-gray-400">No Image</div>
-                    @endif
-                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 text-white">
-                         <h2 class="text-3xl font-bold">{{ $event->name }}</h2>
-                         <p class="text-lg opacity-90">{{ $event->start_date->format('F j, Y - H:i') }}</p>
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden md:flex">
+                <!-- Left: Image & Info -->
+                <div class="md:w-1/2 lg:w-2/5 relative">
+                    <img src="https://placehold.co/800x1200?text={{ urlencode($event->name) }}" alt="{{ $event->name }}" class="w-full h-64 md:h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end md:hidden">
+                        <div class="p-6 text-white">
+                            <h1 class="text-3xl font-bold">{{ $event->name }}</h1>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Ticket Selection -->
-                <div class="md:w-1/2 p-8">
-                    <div class="mb-6">
-                        <h3 class="text-gray-900 font-bold text-xl mb-2">Event Details</h3>
-                        <p class="text-gray-600 mb-2">{{ $event->description ?: 'No description available.' }}</p>
-                        <p class="text-gray-500 text-sm">
-                            <strong>Venue:</strong> {{ $event->venue->name }}<br>
-                            {{ $event->venue->address }}, {{ $event->venue->city }}
-                        </p>
+                <!-- Right: Details & Tickets -->
+                <div class="p-8 md:w-1/2 lg:w-3/5 flex flex-col">
+                    <div class="hidden md:block mb-6">
+                        <h1 class="text-4xl font-extrabold text-gray-900">{{ $event->name }}</h1>
                     </div>
 
-                    <hr class="my-6">
+                    <div class="flex flex-col space-y-4 text-gray-600 mb-8">
+                        <div class="flex items-start">
+                            <svg class="w-6 h-6 mr-3 text-indigo-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <div>
+                                <span class="block font-semibold text-gray-900">{{ $event->start_date->format('l, d F Y') }}</span>
+                                <span class="block text-sm">{{ $event->start_date->format('H:i') }} - {{ $event->end_date->format('H:i') }}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                             <svg class="w-6 h-6 mr-3 text-indigo-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <div>
+                                <span class="block font-semibold text-gray-900">{{ $event->venue->name ?? 'Venue' }}</span>
+                                <span class="block text-sm">{{ $event->venue->address ?? '' }}</span>
+                                <span class="block text-sm">{{ $event->venue->city ?? '' }}</span>
+                            </div>
+                        </div>
+                    </div>
 
-                    <h3 class="text-gray-900 font-bold text-xl mb-4">Select Tickets</h3>
-                    
-                    @if($event->ticketTypes->count() > 0)
-                        <form action="{{ route('public.shop.checkout.store', $tenant->domain) }}" method="POST"> 
-                            @csrf
-                            <div class="space-y-4 mb-6">
-                                @foreach($event->ticketTypes as $ticket)
-                                    <div class="flex justify-between items-center border p-4 rounded-lg hover:border-indigo-500 transition cursor-pointer">
-                                        <div>
-                                            <div class="font-semibold text-gray-900">{{ $ticket->name }}</div>
-                                            <div class="text-sm text-gray-500">
-                                                {{ $ticket->quantity - $ticket->sold }} available
+                    <div class="border-t border-gray-200 pt-8 mt-auto">
+                        <h3 class="text-xl font-semibold text-gray-900 mb-4">{{ __('Select Tickets') }}</h3>
+                        
+                        <div class="space-y-4">
+                            @foreach($event->ticketTypes as $ticketType)
+                                <div class="border rounded-lg p-4 {{ $ticketType->quantity > 0 ? 'hover:border-indigo-300' : 'opacity-60 bg-gray-50' }} transition-colors">
+                                    <form action="{{ route('public.cart.store') }}" method="POST" class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                                        @csrf
+                                        <input type="hidden" name="ticket_type_id" value="{{ $ticketType->id }}">
+                                        
+                                        <div class="flex-grow">
+                                            <div class="font-medium text-gray-900">{{ $ticketType->name }}</div>
+                                            <div class="text-indigo-600 font-bold text-lg">€ {{ number_format($ticketType->price, 2) }}</div>
+                                            @if($ticketType->quantity <= 0)
+                                                <div class="text-red-500 text-xs font-bold uppercase mt-1">Sold Out</div>
+                                            @endif
+                                        </div>
+
+                                        @if($ticketType->quantity > 0)
+                                            <div class="flex items-center space-x-3">
+                                                <select name="quantity" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm">
+                                                    @for($i = 1; $i <= min(10, $ticketType->quantity); $i++)
+                                                        <option value="{{ $i }}">{{ $i }}</option>
+                                                    @endfor
+                                                </select>
+                                                <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 text-sm font-medium">
+                                                    {{ __('Add') }}
+                                                </button>
                                             </div>
-                                        </div>
-                                        <div class="text-right">
-                                            <div class="text-lg font-bold text-gray-900">€ {{ number_format($ticket->price, 2) }}</div>
-                                            <select name="tickets[{{ $ticket->id }}]" class="mt-1 block rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                                <option value="0">0</option>
-                                                <option value="1">1</option>
-                                                <option value="2">2</option>
-                                                <option value="3">3</option>
-                                                <option value="4">4</option>
-                                                <option value="5">5</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-
-                            <h3 class="text-gray-900 font-bold text-xl mb-4">Your Details</h3>
-                            <div class="space-y-4 mb-6">
-                                <div>
-                                    <label for="customer_name" class="block text-sm font-medium text-gray-700">Full Name</label>
-                                    <input type="text" name="customer_name" id="customer_name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                        @else
+                                            <button disabled class="bg-gray-300 text-white px-4 py-2 rounded-md cursor-not-allowed text-sm font-medium">
+                                                {{ __('Unavailable') }}
+                                            </button>
+                                        @endif
+                                    </form>
                                 </div>
-                                <div>
-                                    <label for="customer_email" class="block text-sm font-medium text-gray-700">Email Address</label>
-                                    <input type="email" name="customer_email" id="customer_email" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                </div>
-                            </div>
-                            
-                            @if($errors->any())
-                                <div class="mb-4 text-red-600 text-sm">
-                                    <ul>
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            @endif
-
-                            <button type="submit" class="w-full mt-2 btn-primary font-bold py-3 px-4 rounded hover:bg-indigo-700 transition">
-                                Buy Tickets Now
-                            </button>
-                        </form>
-                    @else
-                        <p class="text-red-500">No tickets available for this event.</p>
-                    @endif
-
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </main>
-</body>
-</html>
+    </div>
+</x-guest-layout>
