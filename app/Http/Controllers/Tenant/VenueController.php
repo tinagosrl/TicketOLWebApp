@@ -28,6 +28,7 @@ class VenueController extends Controller
             'address' => 'required|string|max:255',
             'city' => 'required|string|max:255',
             'capacity' => 'required|integer|min:1',
+            'opening_hours' => 'nullable|array',
         ]);
 
         auth()->user()->tenant->venues()->create($request->all());
@@ -50,6 +51,7 @@ class VenueController extends Controller
             'address' => 'required|string|max:255',
             'city' => 'required|string|max:255',
             'capacity' => 'required|integer|min:1',
+            'opening_hours' => 'nullable|array',
         ]);
 
         $venue->update($request->all());

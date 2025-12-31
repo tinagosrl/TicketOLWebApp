@@ -16,10 +16,12 @@ class Event extends Model
         'venue_id',
         'name',
         'slug',
+        'type',
         'description',
         'start_date',
         'end_date',
         'image_path',
+        'vertical_image_path',
         'is_published',
     ];
 
@@ -42,5 +44,15 @@ class Event extends Model
     public function ticketTypes(): HasMany
     {
         return $this->hasMany(TicketType::class);
+    }
+
+    public function isOpenAccess(): bool
+    {
+        return $this->type === 'open';
+    }
+    
+    public function isScheduled(): bool
+    {
+        return $this->type === 'scheduled';
     }
 }

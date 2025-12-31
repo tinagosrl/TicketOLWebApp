@@ -29,11 +29,65 @@
                             <x-text-input id="capacity" class="block mt-1 w-full" type="number" name="capacity" :value="$venue->capacity" required />
                         </div>
                     </div>
-                    <div class="mt-6 flex justify-end">
+                    
+                    <div class="mt-8 border-t border-gray-200 pt-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('Opening Hours') }}</h3>
+                        <div class="space-y-4">
+                            @foreach(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as $day)
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-24 font-medium text-gray-700 capitalize">{{ __($day) }}</div>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="time" name="opening_hours[{{ $day }}][open]" 
+                                            value="{{ $venue->opening_hours[$day]['open'] ?? '' }}"
+                                            class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                        <span>-</span>
+                                        <input type="time" name="opening_hours[{{ $day }}][close]" 
+                                            value="{{ $venue->opening_hours[$day]['close'] ?? '' }}"
+                                            class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" name="opening_hours[{{ $day }}][closed]" value="1" 
+                                            {{ ($venue->opening_hours[$day]['closed'] ?? false) ? 'checked' : '' }}
+                                            class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                        <span class="ml-2 text-sm text-gray-600">{{ __('Closed') }}</span>
+                                    </div>
+                                    @if($day !== 'monday')
+                                        <div class="flex items-center ml-4">
+                                            <button type="button" onclick="copyPrevious('{{ $day }}')" class="text-xs font-medium text-indigo-600 hover:text-indigo-500">
+                                                {{ __('Copia') }}
+                                            </button>
+                                        </div>
+                                    @endif
+
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+    
+<div class="mt-6 flex justify-end">
                         <x-primary-button>{{ __('Update Venue') }}</x-primary-button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
+    <script>
+        function copyPrevious(currentDay) {
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            const currentIndex = days.indexOf(currentDay);
+            if (currentIndex <= 0) return;
+
+            const prevDay = days[currentIndex - 1];
+
+            const prevOpen = document.querySelector(`input[name="opening_hours[${prevDay}][open]"]`).value;
+            const prevClose = document.querySelector(`input[name="opening_hours[${prevDay}][close]"]`).value;
+            const prevClosed = document.querySelector(`input[name="opening_hours[${prevDay}][closed]"]`).checked;
+
+            document.querySelector(`input[name="opening_hours[${currentDay}][open]"]`).value = prevOpen;
+            document.querySelector(`input[name="opening_hours[${currentDay}][close]"]`).value = prevClose;
+            document.querySelector(`input[name="opening_hours[${currentDay}][closed]"]`).checked = prevClosed;
+        }
+    </script>
+    
 </x-app-layout>

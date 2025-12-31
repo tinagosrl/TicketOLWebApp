@@ -74,10 +74,6 @@ class TenantController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        // Not implemented (using edit)
-    }
 
     /**
      * Show the form for editing the specified resource.
@@ -122,4 +118,34 @@ class TenantController extends Controller
         $tenant->delete();
         return redirect()->route('admin.tenants.index')->with('success', 'Tenant deleted successfully.');
     }
+
+    public function show(Tenant $tenant)
+    {
+        $tenant->load('currentPlan.plan', 'users');
+        return view('admin.tenants.show', compact('tenant'));
+    }
+    
+    public function impersonate(Tenant $tenant)
+    {
+        $user = $tenant->users()->first(); // Assuming first user is Admin
+        if (!$user) {
+            return back()->with('error', 'Nessun utente trovato per questo tenant.');
+        }
+
+        session(['impersonator_id' => auth()->id()]);
+        
+        \Illuminate\Support\Facades\Auth::login($user);
+
+        \App\Models\ImpersonationLog::create([
+            'impersonator_id' => session('impersonator_id'),
+            'impersonated_id' => $user->id,
+            'action' => 'enter',
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
+    
+
+        return redirect()->route('dashboard');
+    }
+
 }

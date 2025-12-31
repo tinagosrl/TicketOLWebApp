@@ -4,9 +4,14 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Manage Tenants') }}
             </h2>
-            <a href="{{ route('admin.tenants.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-                Create Tenant
-            </a>
+            <div class="flex space-x-2">
+                 <a href="{{ route('admin.tenants.export', request()->query()) }}" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                    Export Excel
+                </a>
+                <a href="{{ route('admin.tenants.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                    Create Tenant
+                </a>
+            </div>
         </div>
     </x-slot>
 
@@ -14,11 +19,14 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
-                    @if(session('success'))
-                        <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                            <span class="block sm:inline">{{ session('success') }}</span>
-                        </div>
-                    @endif
+                     <!-- Search Form -->
+                     <form method="GET" action="{{ route('admin.tenants.index') }}" class="mb-6 flex gap-4">
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by Name, Domain, or Email" class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-700">Search</button>
+                        @if(request('search'))
+                            <a href="{{ route('admin.tenants.index') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 flex items-center">Reset</a>
+                        @endif
+                    </form>
 
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
@@ -37,8 +45,8 @@
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $tenant->name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <a href="http://{{ $tenant->domain }}" target="_blank" class="text-blue-600 hover:text-blue-900">
-                                                {{ $tenant->domain }}
+                                            <a href="{{ route('public.shop.index', ['domain' => $tenant->domain]) }}" target="_blank" class="text-blue-600 hover:text-blue-900">
+                                                {{ $tenant->domain }} (Link)
                                             </a>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $tenant->email }}</td>
@@ -57,6 +65,7 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <a href="{{ route('admin.tenants.impersonate', $tenant->id) }}" class="text-yellow-600 hover:text-yellow-900 mr-3 font-bold" title="Login as Admin">Impersonate</a>
                                             <a href="{{ route('admin.tenants.edit', $tenant->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
                                             <form action="{{ route('admin.tenants.destroy', $tenant->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this tenant? This action cannot be undone.');">
                                                 @csrf
@@ -70,7 +79,7 @@
                         </table>
                     </div>
                     <div class="mt-4">
-                        {{ $tenants->links() }}
+                        {{ $tenants->withQueryString()->links() }}
                     </div>
                 </div>
             </div>

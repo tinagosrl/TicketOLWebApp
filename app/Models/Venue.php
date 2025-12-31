@@ -12,11 +12,16 @@ class Venue extends Model
     use HasFactory;
 
     protected $fillable = [
+        'opening_hours',
         'tenant_id',
         'name',
         'address',
         'city',
         'capacity',
+    ];
+
+    protected $casts = [
+        'opening_hours' => 'array',
     ];
 
     public function tenant(): BelongsTo

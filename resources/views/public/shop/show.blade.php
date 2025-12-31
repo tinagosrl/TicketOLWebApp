@@ -1,8 +1,8 @@
-<x-guest-layout>
+<x-tenant-shop-layout>
     <div class="py-12 bg-gray-50 min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="mb-6">
-                <a href="{{ route('public.shop.index') }}" class="text-indigo-600 hover:text-indigo-800 flex items-center">
+                <a href="{{ route('public.shop.index', ['domain' => $tenant->domain]) }}" class="text-indigo-600 hover:text-indigo-800 flex items-center">
                     &larr; {{ __('Back to Events') }}
                 </a>
             </div>
@@ -25,11 +25,30 @@
                     </div>
 
                     <div class="flex flex-col space-y-4 text-gray-600 mb-8">
+
+                        @if($event->type == 'scheduled')
                         <div class="flex items-start">
                             <svg class="w-6 h-6 mr-3 text-indigo-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                             <div>
                                 <span class="block font-semibold text-gray-900">{{ $event->start_date->format('l, d F Y') }}</span>
                                 <span class="block text-sm">{{ $event->start_date->format('H:i') }} - {{ $event->end_date->format('H:i') }}</span>
+                            </div>
+                        </div>
+                        @else
+                        <!-- Open Access Date Display -->
+                         <div class="flex items-start">
+                            <svg class="w-6 h-6 mr-3 text-indigo-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <div>
+                                <span class="block font-semibold text-gray-900">{{ __('Valid until:') }} {{ $event->end_date->format('d M Y') }}</span>
+                            </div>
+                        </div>
+                        @endif
+    
+                        <div class="flex items-start">
+                            <svg class="w-6 h-6 mr-3 text-indigo-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <div>
+                                <span class="block font-semibold text-gray-900">{{ $event->start_date->format('l, d F Y') }}</span>
+                                
                             </div>
                         </div>
                         <div class="flex items-start">
@@ -48,7 +67,7 @@
                         <div class="space-y-4">
                             @foreach($event->ticketTypes as $ticketType)
                                 <div class="border rounded-lg p-4 {{ $ticketType->quantity > 0 ? 'hover:border-indigo-300' : 'opacity-60 bg-gray-50' }} transition-colors">
-                                    <form action="{{ route('public.cart.store') }}" method="POST" class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                                    <form action="{{ route('public.cart.store', ['domain' => $tenant->domain]) }}" method="POST" class="flex flex-col sm:flex-row items-center justify-between gap-4">
                                         @csrf
                                         <input type="hidden" name="ticket_type_id" value="{{ $ticketType->id }}">
                                         
@@ -85,4 +104,4 @@
             </div>
         </div>
     </div>
-</x-guest-layout>
+</x-tenant-shop-layout>

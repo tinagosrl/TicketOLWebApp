@@ -21,6 +21,7 @@ class Plan extends Model
         'is_recommended',
         'features_html',
         'is_active',
+        'allowed_event_types',
     ];
 
     protected $casts = [
@@ -29,6 +30,7 @@ class Plan extends Model
         'features_html' => 'array',
         'is_recommended' => 'boolean',
         'is_active' => 'boolean',
+        'allowed_event_types' => 'array',
     ];
 
     /**

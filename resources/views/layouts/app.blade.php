@@ -18,6 +18,18 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
+        @if(session('impersonator_id'))
+            <div class="bg-red-600 text-white text-center py-2 px-4 text-sm font-bold relative">
+                {{ __('You are impersonating a user.') }}
+                <form action="{{ route('impersonation.leave') }}" method="POST" class="inline-block ml-4">
+                    @csrf
+                    <button type="submit" class="underline hover:text-red-100 uppercase text-xs border border-white px-2 py-1 rounded">
+                        {{ __('Stop Impersonating') }}
+                    </button>
+                </form>
+            </div>
+        @endif
+
         <div class="min-h-screen bg-gray-100">
             @include('layouts.navigation')
 

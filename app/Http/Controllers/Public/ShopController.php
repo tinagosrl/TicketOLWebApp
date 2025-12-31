@@ -12,13 +12,13 @@ class ShopController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request, string $domain)
     {
         $tenant = $request->get('tenant'); // Injected by middleware or resolver
         
         $events = Event::with('venue')
             ->where('tenant_id', $tenant->id)
-            ->where('start_date', '>=', now())
+            ->where('end_date', '>=', now())
             ->orderBy('start_date', 'asc')
             ->paginate(9);
 
@@ -28,7 +28,7 @@ class ShopController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Request $request, $slug)
+    public function show(Request $request, string $domain, string $slug)
     {
         $tenant = $request->get('tenant');
         

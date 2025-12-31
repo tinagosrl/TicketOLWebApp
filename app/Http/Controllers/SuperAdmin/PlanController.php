@@ -35,12 +35,14 @@ class PlanController extends Controller
             'is_recommended' => 'boolean',
             
             'is_active' => 'boolean',
+            'allowed_event_types' => 'array',
         ]);
 
         
         $data = $request->all();
         $data['is_recommended'] = $request->has('is_recommended');
         $data['is_active'] = $request->has('is_active');
+        $data['allowed_event_types'] = $request->input('allowed_event_types', []);
         
         $plan->update($data);
     

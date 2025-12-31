@@ -27,24 +27,51 @@ class EventController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
+        $rules = [
             'venue_id' => 'required|exists:venues,id',
             'name' => 'required|string|max:255',
             'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
             'image' => 'nullable|image|max:2048',
-        ]);
+            'vertical_image' => 'nullable|image|max:2048',
+        ];
+
+        // Conditional Validation
+        if ($request->type === 'open') {
+            $rules['end_date'] = 'nullable|date|after_or_equal:start_date';
+        } else {
+            // Scheduled: Require end date
+            $rules['end_date'] = 'required|date|after_or_equal:start_date';
+        }
+
+        $request->validate($rules);
         
         // Ensure venue belongs to tenant
         $venue = Venue::findOrFail($request->venue_id);
         if ($venue->tenant_id !== auth()->user()->tenant_id) abort(403);
+        
+        // Check Allowed Types (Plan Enforcement) - Added for consistency
+        $allowedTypes = auth()->user()->tenant->currentPlan->plan->allowed_event_types ?? ['scheduled', 'open'];
+        // Default to scheduled if type not sent? View sends type.
+        $type = $request->type ?? 'scheduled';
+        
+        if (!in_array($type, $allowedTypes)) {
+             // Forcing fail or defaulting?
+             // Since UI hides options, this is backend security.
+             // If validation fails, error.
+             return back()->with('error', 'Event type not allowed by plan.');
+        }
 
-        $data = $request->except('image');
+        $data = $request->except(['image', 'vertical_image']);
         $data['tenant_id'] = auth()->user()->tenant_id;
         $data['slug'] = Str::slug($request->name) . '-' . Str::random(6);
+        $data['type'] = $type; // Ensure type is saved
         
         if ($request->hasFile('image')) {
             $data['image_path'] = $request->file('image')->store('events', 'public');
+        }
+
+        if ($request->hasFile('vertical_image')) {
+            $data['vertical_image_path'] = $request->file('vertical_image')->store('events', 'public');
         }
 
         $event = Event::create($data);
@@ -65,17 +92,35 @@ class EventController extends Controller
     {
         if ($event->tenant_id !== auth()->user()->tenant_id) abort(403);
 
-        $request->validate([
+        $rules = [
             'venue_id' => 'required|exists:venues,id',
             'name' => 'required|string|max:255',
             'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
             'image' => 'nullable|image|max:2048',
-        ]);
+            'vertical_image' => 'nullable|image|max:2048',
+        ];
 
-        $data = $request->except('image');
+        if ($request->type === 'open') {
+             $rules['end_date'] = 'nullable|date|after_or_equal:start_date';
+        } else {
+             $rules['end_date'] = 'required|date|after_or_equal:start_date';
+        }
+
+        $request->validate($rules);
+
+        $allowedTypes = auth()->user()->tenant->currentPlan->plan->allowed_event_types ?? ['scheduled', 'open'];
+        if ($request->has('type') && !in_array($request->type, $allowedTypes)) {
+            return back()->with('error', 'The selected event type is not allowed with your current plan.');
+        }
+
+        $data = $request->except(['image', 'vertical_image']);
+        
         if ($request->hasFile('image')) {
             $data['image_path'] = $request->file('image')->store('events', 'public');
+        }
+
+        if ($request->hasFile('vertical_image')) {
+            $data['vertical_image_path'] = $request->file('vertical_image')->store('events', 'public');
         }
 
         $event->update($data);

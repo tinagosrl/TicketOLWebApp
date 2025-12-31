@@ -49,6 +49,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/dashboard', [SuperAdminDashboard::class, 'index'])->name('dashboard');
         Route::resource('plans', PlanController::class)->only(['index', 'edit', 'update']);
         Route::resource('tenants', \App\Http\Controllers\SuperAdmin\TenantController::class);
+        Route::get('tenants/export/excel', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'export'])->name('tenants.export');
+        Route::get('/logs/impersonation', [\App\Http\Controllers\SuperAdmin\ImpersonationLogController::class, 'index'])->name('logs.impersonation');
+        Route::get('/logs/impersonation/export', [\App\Http\Controllers\SuperAdmin\ImpersonationLogController::class, 'export'])->name('logs.impersonation.export');
+    Route::get('/tenants/{tenant}/impersonate', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'impersonate'])->name('tenants.impersonate');
         Route::resource("email_templates", \App\Http\Controllers\SuperAdmin\EmailTemplateController::class);
         Route::get("branding", [\App\Http\Controllers\SuperAdmin\BrandingController::class, "edit"])->name("branding.edit");
         Route::patch("branding", [\App\Http\Controllers\SuperAdmin\BrandingController::class, "update"])->name("branding.update");
@@ -106,3 +110,7 @@ Route::get('/tickets/{ticket}/download', [PdfController::class, 'download'])
 Route::get('/orders/{order}/download-tickets', [PdfController::class, 'downloadOrder'])
     ->name('orders.download.tickets')
     ->middleware('signed');
+
+Route::post('/impersonate/leave', [App\Http\Controllers\ImpersonationController::class, 'leave'])
+    ->name('impersonation.leave')
+    ->middleware('auth');
