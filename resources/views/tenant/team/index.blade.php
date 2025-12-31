@@ -12,7 +12,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('Invite New Member') }}</h3>
                 <div class="text-sm text-gray-600 mb-4">
-                    Usage: {{ $members->count() + $invitations->count() }} / {{ $maxSubAdmins }} slots used.
+                    {{ __('Usage: :count / :max slots used.', ['count' => $members->count() + $invitations->count(), 'max' => $maxSubAdmins]) }}
                 </div>
 
                 @if($canInvite)
@@ -42,7 +42,7 @@
                             <li class="py-4 flex justify-between items-center">
                                 <div>
                                     <p class="text-sm font-medium text-gray-900">{{ $invite->email }}</p>
-                                    <p class="text-xs text-gray-500">Expires: {{ $invite->expires_at->diffForHumans() }}</p>
+                                    <p class="text-xs text-gray-500">{{ __('Expires:') }} {{ $invite->expires_at->diffForHumans() }}</p>
                                 </div>
                                 <form method="POST" action="{{ route('tenant.team.destroy', $invite) }}">
                                     @csrf

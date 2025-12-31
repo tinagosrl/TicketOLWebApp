@@ -29,7 +29,7 @@
                             </div>
                         @endif
                         <input type="file" name="logo" id="logo" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                        <p class="text-xs text-gray-500 mt-1">Recommended size: 200x50px. Max 2MB.</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ __('Recommended size: 200x50px. Max 2MB.') }}</p>
                     </div>
 
                     <!-- Favicon -->
@@ -43,7 +43,7 @@
                             </div>
                         @endif
                         <input type="file" name="favicon" id="favicon" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                        <p class="text-xs text-gray-500 mt-1">Recommended size: 32x32px. Max 1MB.</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ __('Recommended size: 32x32px. Max 1MB.') }}</p>
                     </div>
 
                     <!-- Colors -->
