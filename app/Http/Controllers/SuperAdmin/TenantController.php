@@ -54,7 +54,7 @@ class TenantController extends Controller
         // Create Tenant Admin User
         User::create([
             'tenant_id' => $tenant->id,
-            'name' => $request->name . ' Admin',
+            'first_name' => $request->name, 'last_name' => 'Admin',
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => 'tenant_admin',
