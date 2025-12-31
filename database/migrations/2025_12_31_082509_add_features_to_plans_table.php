@@ -11,11 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('plans', function (Blueprint $table) {
-            $table->integer('position')->nullable()->after('max_subadmins');
-            $table->boolean('is_recommended')->default(false)->after('position');
-            $table->text('features_html')->nullable()->after('description');
-        });
+        if (!Schema::hasColumn('plans', 'position')) {
+            Schema::table('plans', function (Blueprint $table) {
+                $table->integer('position')->nullable()->after('max_subadmins');
+            });
+        }
+
+        if (!Schema::hasColumn('plans', 'is_recommended')) {
+            Schema::table('plans', function (Blueprint $table) {
+                $table->boolean('is_recommended')->default(false)->after('position');
+            });
+        }
+
+        if (!Schema::hasColumn('plans', 'features_html')) {
+            Schema::table('plans', function (Blueprint $table) {
+                $table->text('features_html')->nullable()->after('description');
+            });
+        }
     }
 
     /**
