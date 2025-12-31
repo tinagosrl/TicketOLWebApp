@@ -34,7 +34,7 @@
                                 <x-input-label for="plan_id" :value="__('Initial Plan')" />
                                 <select id="plan_id" name="plan_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                                     @foreach($plans as $plan)
-                                        <option value="{{ $plan->id }}">{{ $plan->name }} (Up to {{ $plan->max_events }} events)</option>
+                                        <option value="{{ $plan->id }}">{{ $plan->getTranslation('name') }} (Up to {{ $plan->max_events }} events)</option>
                                     @endforeach
                                 </select>
                                 <x-input-error :messages="$errors->get('plan_id')" class="mt-2" />

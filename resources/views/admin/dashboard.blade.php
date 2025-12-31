@@ -57,7 +57,7 @@
                                             {{ $tenant->name }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {{ $tenant->currentPlan?->plan->name ?? 'None' }}
+                                            {{ $tenant->currentPlan?->plan->getTranslation('name') ?? 'None' }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                                             @if($tenant->is_active)

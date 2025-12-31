@@ -27,8 +27,8 @@
             <x-input-label for="plan_id" :value="__('Select Subscription Plan')" />
             <select id="plan_id" name="plan_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                 @foreach($plans as $plan)
-                    <option value="{{ $plan->id }}" {{ old('plan_id') == $plan->id ? 'selected' : '' }}>
-                        {{ $plan->name }} - €{{ number_format($plan->price_monthly, 2) }}/mo
+                    <option value="{{ $plan->id }}" {{ (old('plan_id') ?? request()->get('plan_id')) == $plan->id ? 'selected' : '' }}>
+                        {{ $plan->getTranslation('name') }} - €{{ number_format($plan->price_monthly, 2) }}/mo
                         ({{ $plan->ticket_limit > 0 ? $plan->ticket_limit . ' tickets' : 'Unlimited' }})
                     </option>
                 @endforeach

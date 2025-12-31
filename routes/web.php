@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Models\Plan;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboard;
@@ -10,6 +11,9 @@ use App\Http\Middleware\CheckTenantActive;
 use App\Http\Middleware\CheckSuperAdmin;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Tenant\TicketController;
+
+// Plan Selection
+Route::get('/select-plan/{planId}', \App\Http\Controllers\Public\PlanSelectionController::class)->name('plan.select');
 
 // Public Shop Routes (Subdomain)
 Route::domain("{domain}." . parse_url(config("app.url"), PHP_URL_HOST))->middleware(['identify.tenant'])->group(function () {
@@ -25,7 +29,8 @@ Route::domain("{domain}." . parse_url(config("app.url"), PHP_URL_HOST))->middlew
 
 // Landing Page
 Route::get('/', function () {
-    return view('welcome');
+    $plans = Plan::orderBy('position', 'asc')->get();
+    return view('welcome', compact('plans'));
 });
 
 // Public Utilities
@@ -36,6 +41,9 @@ Route::post('/invitations/{token}', [InvitationController::class, 'process'])->n
 // Authenticated Routes
 Route::middleware(['auth', 'verified'])->group(function () {
     
+        Route::get('/payment', [App\Http\Controllers\Auth\PaymentController::class, 'show'])->name('payment.show');
+    Route::post('/payment', [App\Http\Controllers\Auth\PaymentController::class, 'process'])->name('payment.process');
+
     // Super Admin Routes
     Route::middleware([CheckSuperAdmin::class])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [SuperAdminDashboard::class, 'index'])->name('dashboard');

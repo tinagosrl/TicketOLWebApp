@@ -8,6 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (!Schema::hasTable('invoices')) {
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
@@ -19,6 +20,7 @@ return new class extends Migration
             $table->date('paid_at')->nullable();
             $table->timestamps();
         });
+        }
     }
 
     public function down(): void

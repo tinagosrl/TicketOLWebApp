@@ -105,7 +105,37 @@
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end mt-4">
+                
+                <!-- SEO & AI Settings -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mt-6">
+                    <div class="p-6 bg-white border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('SEO & AI Optimization') }}</h3>
+                        
+                        <div class="grid grid-cols-1 gap-6">
+                            <div>
+                                <x-input-label for="seo_meta_description" value="Meta Description (Global)" />
+                                <textarea id="seo_meta_description" name="seo_meta_description" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm" rows="2">{{ $settings['seo_meta_description'] ?? '' }}</textarea>
+                                <p class="text-xs text-gray-500 mt-1">Short description for search engines.</p>
+                            </div>
+                            
+                            <div>
+                                <x-input-label for="seo_keywords" value="Meta Keywords" />
+                                <x-text-input id="seo_keywords" name="seo_keywords" type="text" class="mt-1 block w-full" :value="$settings['seo_keywords'] ?? ''" placeholder="tickets, museums, booking..." />
+                            </div>
+
+                            <div class="border-t pt-4 mt-2">
+                                <x-input-label for="llm_context" value="LLM Context / AI Directives" />
+                                <textarea id="llm_context" name="llm_context" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm font-mono text-xs bg-gray-50" rows="4">{{ $settings['llm_context'] ?? '' }}</textarea>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    Text injected as a comment or hidden meta tag to help AI bots understand this site.
+                                    <br>Example: "This is TicketOL, a platform for booking museum tickets in Italy."
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+<div class="flex items-center justify-end mt-4">
                      <x-primary-button class="ml-4">
                         {{ __('Save Configuration') }}
                     </x-primary-button>

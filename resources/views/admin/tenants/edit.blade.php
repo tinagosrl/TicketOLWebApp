@@ -40,7 +40,7 @@
                         <div class="mt-6 border-t pt-4">
                             <h3 class="text-lg font-medium text-gray-900 mb-2">Current Plan</h3>
                              @if($tenant->currentPlan && $tenant->currentPlan->plan)
-                                <p class="text-gray-600">Currently on <span class="font-semibold">{{ $tenant->currentPlan->plan->name }}</span> (Started: {{ $tenant->currentPlan->starts_at->format('d/m/Y') }})</p>
+                                <p class="text-gray-600">Currently on <span class="font-semibold">{{ $tenant->currentPlan->plan->getTranslation('name') }}</span> (Started: {{ $tenant->currentPlan->starts_at->format('d/m/Y') }})</p>
                             @else
                                 <p class="text-gray-400">No active plan found.</p>
                             @endif

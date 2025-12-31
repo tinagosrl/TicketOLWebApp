@@ -24,16 +24,26 @@ class PlanController extends Controller
     public function update(Request $request, Plan $plan): RedirectResponse
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'name' => 'required|array',
+            'description' => 'nullable|array',
+            'features_html' => 'nullable|array',
             'price_monthly' => 'required|numeric|min:0',
             'price_yearly' => 'required|numeric|min:0',
             'ticket_limit' => 'required|min:0',
             'max_subadmins' => 'required|integer|min:0',
+            'position' => 'nullable|integer',
+            'is_recommended' => 'boolean',
+            
             'is_active' => 'boolean',
         ]);
 
-        $plan->update($request->all());
+        
+        $data = $request->all();
+        $data['is_recommended'] = $request->has('is_recommended');
+        $data['is_active'] = $request->has('is_active');
+        
+        $plan->update($data);
+    
 
         return redirect()->route('admin.plans.index')->with('success', 'Plan updated successfully.');
     }

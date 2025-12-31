@@ -37,6 +37,9 @@ class SystemConfigController extends Controller
             'aruba_sms_username' => 'nullable|string',
             'aruba_sms_password' => 'nullable|string',
             'aruba_sms_sender' => 'nullable|string',
+            'seo_meta_description' => 'nullable|string',
+            'seo_keywords' => 'nullable|string',
+            'llm_context' => 'nullable|string',
         ]);
 
         $keys = [
