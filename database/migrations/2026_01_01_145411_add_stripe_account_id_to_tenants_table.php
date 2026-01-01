@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tenants', function (Blueprint $table) {
-            $table->string('stripe_account_id')->nullable()->after('vat_number');
+            $table->string('stripe_account_id')->nullable()->after('updated_at');
         });
     }
 
