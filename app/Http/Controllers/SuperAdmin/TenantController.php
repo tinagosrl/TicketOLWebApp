@@ -18,7 +18,8 @@ class TenantController extends Controller
      */
     public function index()
     {
-        $tenants = Tenant::with('currentPlan.plan')->latest()->paginate(10);
+        // Fix: Use 'subscription.plan' instead of incorrect 'currentPlan.plan'
+        $tenants = Tenant::with('subscription.plan')->latest()->paginate(10);
         return view('admin.tenants.index', compact('tenants'));
     }
 
@@ -121,7 +122,10 @@ class TenantController extends Controller
 
     public function show(Tenant $tenant)
     {
-        $tenant->load('currentPlan.plan', 'users');
+        // Fix: Use 'subscription.plan' here too if needed, though this line was correct earlier
+        // Wait, line 124 in previous file was: $tenant->load('currentPlan.plan', 'users');
+        // It must also be corrected.
+        $tenant->load('subscription.plan', 'users');
         return view('admin.tenants.show', compact('tenant'));
     }
     
