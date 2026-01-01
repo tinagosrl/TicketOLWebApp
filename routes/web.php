@@ -52,7 +52,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('tenants/export/excel', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'export'])->name('tenants.export');
         Route::get('/logs/impersonation', [\App\Http\Controllers\SuperAdmin\ImpersonationLogController::class, 'index'])->name('logs.impersonation');
         Route::get('/logs/impersonation/export', [\App\Http\Controllers\SuperAdmin\ImpersonationLogController::class, 'export'])->name('logs.impersonation.export');
-    Route::get('/tenants/{tenant}/impersonate', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'impersonate'])->name('tenants.impersonate');
+        Route::get('/tenants/{tenant}/impersonate', [\App\Http\Controllers\SuperAdmin\TenantController::class, 'impersonate'])->name('tenants.impersonate');
+        
+        // Coupons
+        Route::resource('coupons', \App\Http\Controllers\SuperAdmin\CouponController::class);
+
         Route::resource("email_templates", \App\Http\Controllers\SuperAdmin\EmailTemplateController::class);
         Route::get("branding", [\App\Http\Controllers\SuperAdmin\BrandingController::class, "edit"])->name("branding.edit");
         Route::patch("branding", [\App\Http\Controllers\SuperAdmin\BrandingController::class, "update"])->name("branding.update");
@@ -93,6 +97,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get("/tickets/export", [TicketController::class, "export"])->name("tenant.tickets.export");
         Route::post("/tickets/{ticket}/unvalidate", [TicketController::class, "unvalidateTicket"])->name("tenant.tickets.unvalidate");
         
+        // Stripe Connect
+        Route::get("/stripe/connect", [\App\Http\Controllers\Tenant\StripeConnectController::class, "connect"])->name("tenant.stripe.connect");
+        Route::get("/stripe/callback", [\App\Http\Controllers\Tenant\StripeConnectController::class, "callback"])->name("tenant.stripe.callback");
+
         // Shop Settings
         Route::get("/settings/shop", [\App\Http\Controllers\Tenant\ShopSettingController::class, "edit"])->name("tenant.shop.settings.edit");
         Route::patch("/settings/shop", [\App\Http\Controllers\Tenant\ShopSettingController::class, "update"])->name("tenant.shop.settings.update");

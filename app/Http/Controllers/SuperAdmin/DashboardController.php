@@ -18,7 +18,7 @@ class DashboardController extends Controller
             'total_users' => User::count(),
         ];
 
-        $recentTenants = Tenant::with('currentPlan.plan')->latest()->take(5)->get();
+        $recentTenants = Tenant::with('subscription.plan')->latest()->take(5)->get();
 
         return view('admin.dashboard', compact('stats', 'recentTenants'));
     }

@@ -23,6 +23,9 @@
                         <x-nav-link :href="route('admin.plans.index')" :active="request()->routeIs('admin.plans.*')">
                             {{ __('Plans') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('admin.coupons.index')" :active="request()->routeIs('admin.coupons.*')">
+                            {{ __('Discount Codes') }}
+                        </x-nav-link>
 
                         <x-nav-link :href="route('admin.logs.impersonation')" :active="request()->routeIs('admin.logs.*')">
                             {{ __('Activity Logs') }}
