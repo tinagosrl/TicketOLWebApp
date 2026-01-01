@@ -56,6 +56,14 @@ class RegisteredUserController extends Controller
                     $fail(__('The math answer is incorrect. Are you human?'));
                 }
             }],
+            // Billing Validation
+            'vat_number' => ['required', 'string', 'max:20'],
+            'sdi_code' => ['required', 'string', 'max:7'],
+            'pec' => ['required', 'string', 'email', 'max:255'],
+            'address' => ['required', 'string', 'max:255'],
+            'city' => ['required', 'string', 'max:255'],
+            'province' => ['required', 'string', 'size:2'],
+            'zip_code' => ['required', 'string', 'max:10'],
         ]);
 
         return DB::transaction(function () use ($request) {
@@ -65,6 +73,14 @@ class RegisteredUserController extends Controller
                 'email' => $request->email,
                 'domain' => Str::slug($request->domain),
                 'is_active' => false, 
+                // Billing
+                'vat_number' => $request->vat_number,
+                'sdi_code' => $request->sdi_code,
+                'pec' => $request->pec,
+                'address' => $request->address,
+                'city' => $request->city,
+                'province' => strtoupper($request->province),
+                'zip_code' => $request->zip_code,
             ]);
 
             // 2. Create User linked to Tenant

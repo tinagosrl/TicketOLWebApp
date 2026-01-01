@@ -21,8 +21,12 @@ class Tenant extends Model
         'primary_color',
         'secondary_color',
         'vat_number',
+        'sdi_code',
+        'pec',
         'address',
         'city',
+        'province',
+        'zip_code',
         'stripe_account_id',
     ];
 

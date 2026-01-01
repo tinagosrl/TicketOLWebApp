@@ -36,12 +36,60 @@
             <x-input-error :messages="$errors->get('plan_id')" class="mt-2" />
         </div>
 
-        <!-- Discount Code -->
-        <div class="mt-4">
-            <x-input-label for="discount_code" :value="__('Discount Code (Optional)')" />
-            <x-text-input id="discount_code" class="block mt-1 w-full" type="text" name="discount_code" :value="old('discount_code')" />
-            <x-input-error :messages="$errors->get('discount_code')" class="mt-2" />
+        <!-- Billing Address -->
+        <h3 class="text-lg font-medium text-gray-900 mt-6 mb-4 divider">{{ __('Billing Address') }}</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Address -->
+            <div class="md:col-span-2">
+                <x-input-label for="address" :value="__('Address')" />
+                <x-text-input id="address" class="block mt-1 w-full" type="text" name="address" :value="old('address')" required />
+                <x-input-error :messages="$errors->get('address')" class="mt-2" />
+            </div>
+
+            <!-- City -->
+            <div>
+                <x-input-label for="city" :value="__('City')" />
+                <x-text-input id="city" class="block mt-1 w-full" type="text" name="city" :value="old('city')" required />
+                <x-input-error :messages="$errors->get('city')" class="mt-2" />
+            </div>
+
+            <!-- Province & Zip -->
+            <div class="flex gap-4">
+                <div class="w-1/2">
+                    <x-input-label for="province" :value="__('Prov (e.g. MI)')" />
+                    <x-text-input id="province" class="block mt-1 w-full uppercase" type="text" name="province" :value="old('province')" required maxlength="2" />
+                    <x-input-error :messages="$errors->get('province')" class="mt-2" />
+                </div>
+                <div class="w-1/2">
+                     <x-input-label for="zip_code" :value="__('ZIP Code')" />
+                    <x-text-input id="zip_code" class="block mt-1 w-full" type="text" name="zip_code" :value="old('zip_code')" required />
+                    <x-input-error :messages="$errors->get('zip_code')" class="mt-2" />
+                </div>
+            </div>
+
+            <!-- VAT Number -->
+            <div>
+                <x-input-label for="vat_number" :value="__('VAT Number (P.IVA)')" />
+                <x-text-input id="vat_number" class="block mt-1 w-full" type="text" name="vat_number" :value="old('vat_number')" required />
+                <x-input-error :messages="$errors->get('vat_number')" class="mt-2" />
+            </div>
+
+             <!-- SDI & PEC -->
+             <div class="flex gap-4">
+                <div class="w-1/3">
+                    <x-input-label for="sdi_code" :value="__('SDI Code')" />
+                    <x-text-input id="sdi_code" class="block mt-1 w-full uppercase" type="text" name="sdi_code" :value="old('sdi_code')" required maxlength="7" />
+                    <x-input-error :messages="$errors->get('sdi_code')" class="mt-2" />
+                </div>
+                <div class="w-2/3">
+                     <x-input-label for="pec" :value="__('PEC Email')" />
+                    <x-text-input id="pec" class="block mt-1 w-full" type="email" name="pec" :value="old('pec')" required />
+                    <x-input-error :messages="$errors->get('pec')" class="mt-2" />
+                </div>
+            </div>
         </div>
+
 
         <h3 class="text-lg font-medium text-gray-900 mt-6 mb-4 divider">{{ __('Account Details') }}</h3>
 
@@ -89,6 +137,13 @@
             <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
             <x-text-input id="password_confirmation" class="block mt-1 w-full" type="password" name="password_confirmation" required autocomplete="new-password" />
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+        </div>
+
+        <!-- Discount Code -->
+        <div class="mt-4">
+            <x-input-label for="discount_code" :value="__('Discount Code (Optional)')" />
+            <x-text-input id="discount_code" class="block mt-1 w-full" type="text" name="discount_code" :value="old('discount_code')" />
+            <x-input-error :messages="$errors->get('discount_code')" class="mt-2" />
         </div>
 
         <!-- Security Check (Honeypot + Math) -->
