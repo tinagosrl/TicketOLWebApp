@@ -55,6 +55,7 @@
                         
                         <div>
                              <x-input-label for="image" :value="__('Event Image')" />
+                             <p class="text-xs text-gray-500 mb-1">Recommended: 800x600px</p>
                              @if($event->image_path)
                                 <div class="mb-2">
                                     <img src="{{ Storage::url($event->image_path) }}" class="h-20 w-auto rounded" />
@@ -75,12 +76,12 @@
 
                         <div>
                             <x-input-label for="start_date" :value="__('Start Date')" />
-                            <x-text-input id="start_date" class="block mt-1 w-full" type="datetime-local" name="start_date" :value="$event->start_date->format('Y-m-d\TH:i')" required />
+                            <x-text-input id="start_date" class="block mt-1 w-full" type="datetime-local" name="start_date" :value="$event->start_date ? $event->start_date->format('Y-m-d\TH:i') : ''" required />
                         </div>
 
                         <div>
                             <x-input-label for="end_date" :value="__('End Date')" />
-                            <x-text-input id="end_date" class="block mt-1 w-full" type="datetime-local" name="end_date" :value="$event->end_date->format('Y-m-d\TH:i')" required />
+                            <x-text-input id="end_date" class="block mt-1 w-full" type="datetime-local" name="end_date" :value="$event->end_date ? $event->end_date->format('Y-m-d\TH:i') : ''" />
                         </div>
                     </div>
 
