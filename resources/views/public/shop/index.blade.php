@@ -15,9 +15,9 @@
                 <div class="flex flex-wrap justify-center gap-8">
                     @foreach($events as $event)
                         <div class="w-full md:w-[24rem] bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
-                            {{-- Placeholder Image - Could be dynamic --}}
+                            {{-- Image Logic --}}
                             <div class="h-48 bg-gray-200 w-full relative">
-                                <img src="https://placehold.co/600x400?text={{ urlencode($event->name) }}" alt="{{ $event->name }}" class="w-full h-full object-cover">
+                                <img src="{{ $event->image_path ? Storage::url($event->image_path) : 'https://placehold.co/600x400?text=' . urlencode($event->name) }}" alt="{{ $event->name }}" class="w-full h-full object-cover">
                                 <div class="absolute top-0 right-0 bg-indigo-600 text-white px-3 py-1 rounded-bl-lg text-sm font-bold">
                                     {{ $event->start_date->format('d M') }}
                                 </div>
