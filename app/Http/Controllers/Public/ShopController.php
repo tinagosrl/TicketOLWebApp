@@ -18,7 +18,11 @@ class ShopController extends Controller
         
         $events = Event::with('venue')
             ->where('tenant_id', $tenant->id)
-            ->where('end_date', '>=', now())
+            ->where(function($q) {
+                // Show if end_date is null (Open) OR end_date is in future
+                $q->whereNull('end_date')
+                  ->orWhere('end_date', '>=', now());
+            })
             ->orderBy('start_date', 'asc')
             ->paginate(9);
 
