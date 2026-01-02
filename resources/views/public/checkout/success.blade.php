@@ -8,23 +8,23 @@
                     </svg>
                 </div>
                 
-                <h2 class="text-2xl font-extrabold text-gray-900 mb-2">Order Confirmed!</h2>
-                <p class="text-sm text-gray-500 mb-6">
-                    Reference: <span class="font-mono font-bold text-gray-700">{{ $order->reference_no }}</span>
-                </p>
+                <h2 class="text-2xl font-extrabold text-gray-900 mb-2">{{ __('Order Confirmed!') }}</h2>
+                <div class="text-sm text-gray-500 mb-6 flex justify-center items-center gap-1">
+                    {{ __('Reference') }}: <span class="font-mono font-bold text-gray-700 select-all">{{ $order->reference_no }}</span>
+                </div>
 
                 <div class="border-t border-b border-gray-200 py-4 mb-6 text-left">
-                    <p class="text-sm text-gray-600 mb-2">Thank you, <strong>{{ $order->customer_name }}</strong>.</p>
-                    <p class="text-sm text-gray-600">A confirmation email has been sent to {{ $order->customer_email }}.</p>
+                    <p class="text-sm text-gray-600 mb-2">{!! __('Thank you, :name.', ['name' => '<strong>' . $order->customer_name . '</strong>']) !!}</p>
+                    <p class="text-sm text-gray-600">{{ __('A confirmation email has been sent to :email.', ['email' => $order->customer_email]) }}</p>
                 </div>
 
                 <div class="space-y-3">
                     <a href="{{ \Illuminate\Support\Facades\URL::signedRoute('orders.download.tickets', $order->id) }}" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Download Tickets (PDF)
+                        {{ __('Download Tickets (PDF)') }}
                     </a>
                     
                     <a href="{{ route('public.shop.index') }}" class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Return to Events
+                        {{ __('Return to Events') }}
                     </a>
                 </div>
             </div>
