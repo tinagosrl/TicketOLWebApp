@@ -28,16 +28,20 @@
                         
                         @php
                             $allowedTypes = auth()->user()->tenant->currentPlan->plan->allowed_event_types ?? ['scheduled', 'open'];
+                            $isScheduled = $event->type === 'scheduled';
+                            // Initial Format Logic
+                            $startDateFormat = $isScheduled ? 'Y-m-d\TH:i' : 'Y-m-d';
+                            $endDateFormat = $isScheduled ? 'Y-m-d\TH:i' : 'Y-m-d';
                         @endphp
                         
                         <div class="md:col-span-2">
                              <x-input-label for="type" :value="__('Event Type')" />
                              <select id="type" name="type" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                                 @if(in_array('scheduled', $allowedTypes))
-                                    <option value="scheduled" {{ $event->type == 'scheduled' ? 'selected' : '' }}>{{ __('Scheduled Event (Concert, Show)') }}</option>
+                                    <option value="scheduled" {{ $isScheduled ? 'selected' : '' }}>{{ __('Scheduled Event (Concert, Show)') }}</option>
                                 @endif
                                 @if(in_array('open', $allowedTypes))
-                                    <option value="open" {{ $event->type == 'open' ? 'selected' : '' }}>{{ __('Open Access (Museum, Park)') }}</option>
+                                    <option value="open" {{ !$isScheduled ? 'selected' : '' }}>{{ __('Open Access (Museum, Park)') }}</option>
                                 @endif
                              </select>
                         </div>
@@ -76,12 +80,19 @@
 
                         <div>
                             <x-input-label for="start_date" :value="__('Start Date')" />
-                            <x-text-input id="start_date" class="block mt-1 w-full" type="datetime-local" name="start_date" :value="$event->start_date ? $event->start_date->format('Y-m-d\TH:i') : ''" required />
+                            <!-- Note: type is initially set by PHP to avoid mismatch, JS will handle updates -->
+                            <x-text-input id="start_date" class="block mt-1 w-full" 
+                                          type="{{ $isScheduled ? 'datetime-local' : 'date' }}" 
+                                          name="start_date" 
+                                          :value="$event->start_date ? $event->start_date->format($startDateFormat) : ''" required />
                         </div>
 
                         <div>
                             <x-input-label for="end_date" :value="__('End Date')" />
-                            <x-text-input id="end_date" class="block mt-1 w-full" type="datetime-local" name="end_date" :value="$event->end_date ? $event->end_date->format('Y-m-d\TH:i') : ''" />
+                            <x-text-input id="end_date" class="block mt-1 w-full" 
+                                          type="{{ $isScheduled ? 'datetime-local' : 'date' }}" 
+                                          name="end_date" 
+                                          :value="$event->end_date ? $event->end_date->format($endDateFormat) : ''" />
                         </div>
                     </div>
 
@@ -166,22 +177,35 @@
         const typeSelect = document.getElementById('type');
         const startDateInput = document.getElementById('start_date');
         const endDateInput = document.getElementById('end_date');
-        const endDateContainer = endDateInput.closest('div'); 
         
         function updateInputs() {
             const type = typeSelect.value;
+            // Capture current values
+            let startVal = startDateInput.value;
+            let endVal = endDateInput.value;
+
             if (type === 'open') {
                 startDateInput.type = 'date';
                 endDateInput.type = 'date';
+                
+                // If it has 'T', strip it
+                if(startVal.includes('T')) startDateInput.value = startVal.split('T')[0];
+                if(endVal.includes('T')) endDateInput.value = endVal.split('T')[0];
+
             } else {
                 startDateInput.type = 'datetime-local';
                 endDateInput.type = 'datetime-local';
+                
+                // If it doesn't have 'T' and has value, add time
+                if(startVal && !startVal.includes('T')) startDateInput.value = startVal + 'T09:00';
+                if(endVal && !endVal.includes('T')) endDateInput.value = endVal + 'T18:00';
             }
         }
         
         if(typeSelect) {
             typeSelect.addEventListener('change', updateInputs);
-            updateInputs(); 
+            // Don't call updateInputs() on init here because PHP handles the initial state correctly.
+            // We only want to intervene if USER changes the type.
         }
     });
 </script>
