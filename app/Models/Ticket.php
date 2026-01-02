@@ -15,21 +15,13 @@ class Ticket extends Model
         'order_item_id',
         'ticket_type_id',
         'unique_code',
-        'validated_at',
-    ];
-
-    protected $casts = [
-        'validated_at' => 'datetime',
+        'status', // valid, used, expired, cancelled
+        'remaining_uses', // Default 1. >1 for group tickets on single QR.
     ];
 
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
-    }
-
-    public function orderItem(): BelongsTo
-    {
-        return $this->belongsTo(OrderItem::class);
     }
 
     public function ticketType(): BelongsTo

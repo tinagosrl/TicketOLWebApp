@@ -60,7 +60,7 @@ class TicketController extends Controller
                 break;
             case 'active':
             default:
-                if ($tab !== 'logs') { // Only apply active filter if not logs, though usually logs is handled separately
+                if ($tab !== 'logs') { // Only apply active filter if not logs
                      $query->whereNull('validated_at')
                       ->where('created_at', '>=', now()->subYear())
                       ->whereHas('ticketType.event', function($eq) {
@@ -118,7 +118,7 @@ class TicketController extends Controller
             if ($request->get('format') === 'excel') {
                 return Excel::download(new TicketLogsExport($logs), 'logs.xlsx');
             }
-             // CSV fallback for logs? or implement CSV manually like tickets?
+             return Excel::download(new TicketLogsExport($logs), 'logs.csv', \Maatwebsite\Excel\Excel::CSV);
         } else {
             $query = $this->getTicketsQuery($tenant, $tab, $search, $dateFrom, $dateTo);
             $tickets = $query->get();
@@ -126,18 +126,6 @@ class TicketController extends Controller
             if ($request->get('format') === 'excel') {
                 return Excel::download(new TicketsExport($tickets), 'tickets.xlsx');
             }
-        }
-        
-        // Manual CSV Export (Fallback or if format not excel)
-        // Note: For Logs CSV logic is missing in previous implementation, assume user prefers Excel now for everything.
-        // But let's keep the existing CSV for tickets if requested.
-        
-        // Let's force Excel for simplicity if format is not explicitly CSV, OR reimplement CSV using the collection.
-        // Actually, we can use Excel::download for CSV too by passing \Maatwebsite\Excel\Excel::CSV
-        
-        if ($tab === 'logs') {
-             return Excel::download(new TicketLogsExport($logs), 'logs.csv', \Maatwebsite\Excel\Excel::CSV);
-        } else {
              return Excel::download(new TicketsExport($tickets), 'tickets.csv', \Maatwebsite\Excel\Excel::CSV);
         }
     }
@@ -174,22 +162,35 @@ class TicketController extends Controller
             abort(403);
         }
 
-        if ($ticket->validated_at) {
-            return back()->with('error', __('Ticket already validated.'));
+        if ($ticket->validated_at && $ticket->remaining_uses <= 0) {
+            return back()->with('error', __('Ticket fully used and validated.'));
         }
 
-        $ticket->update(['validated_at' => now()]);
+        // Logic for Multi-Use Tickets
+        if ($ticket->remaining_uses > 1) {
+            $ticket->decrement('remaining_uses');
+            $action = 'validated_partial';
+            $msg = __('Entry Validated. Remaining uses: ') . $ticket->remaining_uses;
+        } else {
+            // Last Use
+            $ticket->update([
+                'remaining_uses' => 0,
+                'validated_at' => now()
+            ]);
+            $action = 'validated';
+            $msg = __('Ticket validated successfully.');
+        }
 
         // Log
         TicketLog::create([
             'ticket_id' => $ticket->id,
             'user_id' => auth()->id(),
-            'action' => 'validated',
+            'action' => $action,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
         ]);
 
-        return back()->with('success', __('Ticket validated successfully.'));
+        return back()->with('success', $msg);
     }
 
     public function unvalidateTicket(Ticket $ticket)
@@ -198,11 +199,38 @@ class TicketController extends Controller
             abort(403);
         }
 
+        // For simplicity, unvalidate restores 1 use or resets?
+        // Let's say it resets "validated_at" and ensures at least 1 use if it was 0.
+        // Complex scenario: if partial, unvalidate adds 1? 
+        // For MVP: Unvalidate restores fully if cancelled? Or allow Increment?
+        // Let's keep existing logic: Reset timestamp. If 0 uses, set to 1?
+        // Safe bet: If validated_at is set, it means it was exhausted.
+        
         if (!$ticket->validated_at) {
-             return back()->with('error', __('Ticket is not validated.'));
+             // Maybe it was partially valid? 
+             // Allow 'Undoing' a partial scan is tricky without history tracking of exact decrement.
+             return back()->with('error', __('Ticket is still valid/active.'));
         }
 
-        $ticket->update(['validated_at' => null]);
+        $ticket->update([
+            'validated_at' => null,
+            'remaining_uses' => 1 // Reset to at least 1? Or restore original? 
+                                  // We don't store original quantity on Ticket, only order item.
+                                  // Fetch from Order Item to be safe?
+        ]);
+        
+        // Restore fully? Or just 1? 
+        // Let's grab original quantity from OrderItem if possible, otherwise 1.
+        $originalQty = $ticket->orderItem ? $ticket->orderItem->quantity : 1;
+        // Wait, orderItem->quantity is total bought.
+        // If consolidated, ticket->remaining_uses should be orderItem->quantity.
+        // Check if other tickets exist for this item?
+        // If query count(tickets for order_item) == 1, then it was consolidated.
+        $count = Ticket::where('order_item_id', $ticket->order_item_id)->count();
+        if ($count == 1) {
+             $ticket->update(['remaining_uses' => $ticket->orderItem->quantity]);
+        }
+
 
         // Log
         TicketLog::create([
@@ -213,7 +241,7 @@ class TicketController extends Controller
             'user_agent' => request()->userAgent(),
         ]);
 
-         return back()->with('success', __('Ticket validation reverted.'));
+         return back()->with('success', __('Ticket validation reverted (Reset to original uses).'));
     }
 
     public function destroy(Ticket $ticket)
@@ -222,7 +250,23 @@ class TicketController extends Controller
             abort(403);
         }
         
-        $ticket->ticketType->decrement('sold'); // Decrement by 1 since it's a single ticket
+        // Decrement sold count?
+        // If consolidated, decrement by remaining uses? Or total original?
+        // sold count on TicketType tracks total SOLD, not valid.
+        // Cancellation should decrement sold count.
+        
+        // If consolidated, how many sold were represented? 
+        // Ideally we check orderItem->quantity if $count == 1.
+        $count = Ticket::where('order_item_id', $ticket->order_item_id)->count();
+        $qtyToDecrement = 1;
+        if($count == 1 && $ticket->remaining_uses > 1) {
+             // It's a group ticket (or partially used).
+             // We should decrement by its original value? Or current?
+             // Usually cancellation refunds the whole thing.
+             $qtyToDecrement = $ticket->orderItem->quantity;
+        }
+        
+        $ticket->ticketType->decrement('sold', $qtyToDecrement);
         
         $ticket->delete();
 

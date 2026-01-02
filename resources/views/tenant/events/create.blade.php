@@ -84,22 +84,27 @@
         const typeSelect = document.getElementById('type');
         const startDateInput = document.getElementById('start_date');
         const endDateInput = document.getElementById('end_date');
-        const endDateContainer = endDateInput.closest('div'); // Assuming wrapped in div
         
         function updateInputs() {
             const type = typeSelect.value;
+            // Capture current values
+            let startVal = startDateInput.value;
+            let endVal = endDateInput.value;
+
             if (type === 'open') {
-                // Change to Date only
                 startDateInput.type = 'date';
                 endDateInput.type = 'date';
                 
-                // End Date Optional? Label logic?
-                // Let's keep it visible but ensure backend allows null.
-                // User said "if I don't put end date".
+                // If it has 'T', strip it
+                if(startVal.includes('T')) startDateInput.value = startVal.split('T')[0];
+                if(endVal.includes('T')) endDateInput.value = endVal.split('T')[0];
             } else {
-                // Scheduled: DateTime
                 startDateInput.type = 'datetime-local';
                 endDateInput.type = 'datetime-local';
+                
+                // If it doesn't have 'T' and has value, add time
+                if(startVal && !startVal.includes('T')) startDateInput.value = startVal + 'T09:00';
+                if(endVal && !endVal.includes('T')) endDateInput.value = endVal + 'T18:00';
             }
         }
         

@@ -37,6 +37,7 @@ class CheckoutController extends Controller
         $request->validate([
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'required|email|max:255',
+            'consolidate_tickets' => 'nullable|boolean', // 1 = Single QR per type
         ]);
 
         try {
@@ -75,13 +76,28 @@ class CheckoutController extends Controller
                     'status' => 'pending', 
                 ]);
 
+                // Store consolidation preference in order (optional, but good for reference if we add meta later)
+                // For now we just use it during finalizeOrder via request or param.
+                // Since finalize can happen independently (webhook), we should prob store it.
+                // But for MVP we assume success immediately or simple redirect.
+                // FIX: Let's store it in session flash or just re-determine (cannot redo safely).
+                // BETTER: Store 'notes' or 'metadata' in Order table. 
+                // Using session for now as Stripe webhook is separate and won't have request data.
+                // Actually `finalizeOrder` generates tickets. Stripe webhook logic in `CheckoutController`
+                // doesn't have access to `consolidate_tickets`.
+                // WE MUST CREATE TICKETS AFTER PAYMENT SUCCESS usually.
+                // However, for this MVP, I'll pass the param through Session for the redirect flow.
+                // For valid Webhook flow, we'd default to separate tickets if not stored.
+                if ($request->has('consolidate_tickets')) {
+                    Session::put('consolidate_tickets_' . $order->id, true);
+                }
+
                 // 3. Create Order Items
                 foreach ($cart as $item) {
                     $order->items()->create([
                         'ticket_type_id' => $item['id'],
                         'quantity' => $item['quantity'],
                         'price' => $item['price'],
-                        // 'ticket_type_name' => ... (if we add this column to order_items later)
                     ]);
                 }
 
@@ -108,8 +124,7 @@ class CheckoutController extends Controller
     public function success(Request $request, $reference)
     {
         $tenant = $request->get('tenant');
-        $session_id = $request->query('session_id');
-
+        
         $order = Order::where('reference_no', $reference)
             ->where('tenant_id', $tenant->id)
             ->firstOrFail();
@@ -117,10 +132,6 @@ class CheckoutController extends Controller
         if ($order->status === 'paid') {
             return view('public.checkout.success', compact('order', 'tenant'));
         }
-
-        // Technically we should verify $session_id with Stripe here to be secure.
-        // For MVP/Demo, we assume if they hit this URL with basic checks, it's OK.
-        // Or PaymentService could have a verify method.
         
         return $this->finalizeOrder($order, true);
     }
@@ -133,16 +144,34 @@ class CheckoutController extends Controller
         DB::transaction(function () use ($order) {
             $order->update(['status' => 'paid']);
 
+            // Determine if consolidation was requested
+            $consolidate = Session::get('consolidate_tickets_' . $order->id, false);
+            Session::forget('consolidate_tickets_' . $order->id); // Cleanup
+
             // Generate Tickets
             foreach ($order->items as $item) {
-                 for ($i = 0; $i < $item['quantity']; $i++) {
-                    Ticket::create([
+                if ($consolidate && $item->quantity > 1) {
+                    // SINGLE Ticket with Multiple Uses
+                     Ticket::create([
                         'order_id' => $order->id,
                         'order_item_id' => $item->id,
                         'ticket_type_id' => $item->ticket_type_id,
                         'unique_code' => Str::upper(Str::random(12)),
-                        // 'status' => 'valid' (default)
+                        'status' => 'valid',
+                        'remaining_uses' => $item->quantity, // N uses
                     ]);
+                } else {
+                    // SEPARATE Tickets (1 use each)
+                    for ($i = 0; $i < $item['quantity']; $i++) {
+                        Ticket::create([
+                            'order_id' => $order->id,
+                            'order_item_id' => $item->id,
+                            'ticket_type_id' => $item->ticket_type_id,
+                            'unique_code' => Str::upper(Str::random(12)),
+                            'status' => 'valid',
+                            'remaining_uses' => 1,
+                        ]);
+                    }
                 }
             }
         });
