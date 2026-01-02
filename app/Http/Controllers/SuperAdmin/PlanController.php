@@ -31,7 +31,8 @@ class PlanController extends Controller
             'price_yearly' => 'required|numeric|min:0',
             'ticket_limit' => 'required|min:0',
             'max_subadmins' => 'required|integer|min:0',
-            'application_fee_percent' => 'required|numeric|min:0|max:100', // <--- Added validation
+            'max_venues' => 'required|integer|min:0', // <--- Added validation
+            'application_fee_percent' => 'required|numeric|min:0|max:100',
             'position' => 'nullable|integer',
             'is_recommended' => 'boolean',
             

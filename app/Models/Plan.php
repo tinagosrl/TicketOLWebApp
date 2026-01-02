@@ -18,6 +18,7 @@ class Plan extends Model
         'price_yearly', 
         'ticket_limit', 
         'max_subadmins',
+        'max_venues', // <--- Added
         'is_active',
         'allowed_event_types',
         'position',
@@ -36,6 +37,7 @@ class Plan extends Model
         'price_yearly' => 'decimal:2',
         'application_fee_percent' => 'decimal:2',
         'allowed_event_types' => 'array',
+        'max_venues' => 'integer', // <--- Added
     ];
 
     /**

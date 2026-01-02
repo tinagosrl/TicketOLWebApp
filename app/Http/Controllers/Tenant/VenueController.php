@@ -16,13 +16,36 @@ class VenueController extends Controller
         return view('tenant.venues.index', compact('venues'));
     }
 
-    public function create(): View
+    public function create()
     {
+        $tenant = auth()->user()->tenant;
+        $plan = $tenant->subscription->plan ?? null;
+        
+        if ($plan) {
+            $maxVenues = $plan->max_venues ?? 0; // 0 = Unlimited
+            if ($maxVenues > 0 && $tenant->venues()->count() >= $maxVenues) {
+                 return redirect()->route('tenant.venues.index')
+                    ->with('error', "Your plan allows a maximum of {$maxVenues} venues. Please upgrade to add more.");
+            }
+        }
+
         return view('tenant.venues.create');
     }
 
     public function store(Request $request): RedirectResponse
     {
+        $tenant = auth()->user()->tenant;
+        $plan = $tenant->subscription->plan ?? null;
+        
+        // Enforce Limit
+        if ($plan) {
+            $maxVenues = $plan->max_venues ?? 0;
+            if ($maxVenues > 0 && $tenant->venues()->count() >= $maxVenues) {
+                 return redirect()->route('tenant.venues.index')
+                    ->with('error', "Your plan allows a maximum of {$maxVenues} venues.");
+            }
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'address' => 'required|string|max:255',
@@ -31,7 +54,7 @@ class VenueController extends Controller
             'opening_hours' => 'nullable|array',
         ]);
 
-        auth()->user()->tenant->venues()->create($request->all());
+        $tenant->venues()->create($request->all());
 
         return redirect()->route('tenant.venues.index')->with('success', 'Venue created successfully.');
     }

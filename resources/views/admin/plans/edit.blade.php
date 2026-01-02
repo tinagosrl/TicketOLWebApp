@@ -81,6 +81,10 @@
                                 <x-text-input id="ticket_limit" class="block mt-1 w-full" type="number" name="ticket_limit" :value="$plan->ticket_limit" required />
                             </div>
                              <div>
+                                <x-input-label for="max_venues" :value="__('Max Venues (0 = Unlimited)')" />
+                                <x-text-input id="max_venues" class="block mt-1 w-full" type="number" name="max_venues" :value="$plan->max_venues ?? 1" required />
+                            </div>
+                             <div>
                                 <x-input-label for="max_subadmins" :value="__('Max SubAdmins')" />
                                 <x-text-input id="max_subadmins" class="block mt-1 w-full" type="number" name="max_subadmins" :value="$plan->max_subadmins" required />
                             </div>
