@@ -17,6 +17,7 @@ class TicketTypeController extends Controller
             'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'quantity' => 'required|integer|min:0', // 0 means Unlimited
+            'min_purchase' => 'nullable|integer|min:1', // Added validation
         ]);
 
         $event = Event::findOrFail($request->event_id);
@@ -28,6 +29,11 @@ class TicketTypeController extends Controller
         // Treat 0 as Unlimited (-1 in DB)
         if ($request->quantity == 0) {
             $data['quantity'] = -1;
+        }
+
+        // Default min_purchase to 1 if not present
+        if (!isset($data['min_purchase'])) {
+            $data['min_purchase'] = 1;
         }
 
         $event->ticketTypes()->create($data);

@@ -15,6 +15,7 @@ class TicketType extends Model
         'name',
         'price',
         'quantity',
+        'min_purchase', // Added min_purchase
         'sold',
     ];
 

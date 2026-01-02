@@ -38,13 +38,21 @@ class CartController extends Controller
         ]);
 
         $ticketType = TicketType::with('event')->findOrFail($request->ticket_type_id);
+        
+        // Custom Validation for Min Purchase
+        if ($request->quantity < $ticketType->min_purchase) {
+            return redirect()->back()->with('error', "Minimum purchase quantity for {$ticketType->name} is {$ticketType->min_purchase}.");
+        }
+
         $cart = Session::get('cart', []);
 
         // Unique key for cart item (just ticket_type_id for now as no variants)
         $id = $ticketType->id;
 
         if (isset($cart[$id])) {
-            $cart[$id]['quantity'] += $request->quantity;
+            $currentQty = $cart[$id]['quantity'];
+            $newQty = $currentQty + $request->quantity;
+            $cart[$id]['quantity'] = $newQty;
         } else {
             $cart[$id] = [
                 'id' => $id,
@@ -52,7 +60,8 @@ class CartController extends Controller
                 'event_name' => $ticketType->event->name,
                 'price' => $ticketType->price,
                 'quantity' => $request->quantity,
-                'ticket_type_obj' => $ticketType 
+                'min_purchase' => $ticketType->min_purchase, // Store for potential re-checks
+                // 'ticket_type_obj' => $ticketType  // Avoid storing full object in session if not needed
             ];
         }
 

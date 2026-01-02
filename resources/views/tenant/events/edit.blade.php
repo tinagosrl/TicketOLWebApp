@@ -109,10 +109,10 @@
                 </div>
 
                 <!-- Add New Ticket Type Form (Inline) -->
-                <form method="POST" action="{{ route('tenant.ticket_types.store') }}" class="mb-6 p-4 bg-gray-50 rounded-lg flex gap-4 items-end">
+                <form method="POST" action="{{ route('tenant.ticket_types.store') }}" class="mb-6 p-4 bg-gray-50 rounded-lg flex flex-wrap gap-4 items-end">
                     @csrf
                     <input type="hidden" name="event_id" value="{{ $event->id }}">
-                    <div class="flex-grow">
+                    <div class="flex-grow min-w-[200px]">
                         <x-input-label for="ticket_name" :value="__('Name (e.g. VIP)')" />
                         <x-text-input id="ticket_name" class="block mt-1 w-full" type="text" name="name" required placeholder="Standard" />
                     </div>
@@ -120,9 +120,14 @@
                         <x-input-label for="price" :value="__('Price (€)')" />
                         <x-text-input id="price" class="block mt-1 w-full" type="number" step="0.01" name="price" required placeholder="10.00" />
                     </div>
+                    <div class="w-24">
+                        <x-input-label for="min_purchase" :value="__('Min Qty')" />
+                        <x-text-input id="min_purchase" class="block mt-1 w-full" type="number" name="min_purchase" value="1" min="1" required />
+                    </div>
                     <div class="w-32">
-                        <x-input-label for="quantity" :value="__('Quantity (0=Unlimited)')" />
+                        <x-input-label for="quantity" :value="__('Total Qty')" />
                         <x-text-input id="quantity" class="block mt-1 w-full" type="number" name="quantity" required placeholder="100" />
+                        <p class="text-xs text-gray-500 mt-1">0 = Unlimited</p>
                     </div>
                     <x-secondary-button type="submit" class="mb-0.5">
                         {{ __('Add') }}
@@ -136,6 +141,7 @@
                             <tr>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Min Purchase</th>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Available</th>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Sold</th>
                                 <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
@@ -146,6 +152,7 @@
                                 <tr>
                                     <td class="px-4 py-2 text-sm text-gray-900">{{ $ticket->name }}</td>
                                     <td class="px-4 py-2 text-sm text-gray-500">€ {{ number_format($ticket->price, 2) }}</td>
+                                     <td class="px-4 py-2 text-sm text-gray-500">{{ $ticket->min_purchase }}</td>
                                     <td class="px-4 py-2 text-sm text-gray-500">
                                         @if($ticket->quantity == -1)
                                             <span class="text-green-600 font-bold">Unlimited</span>
@@ -204,8 +211,7 @@
         
         if(typeSelect) {
             typeSelect.addEventListener('change', updateInputs);
-            // Don't call updateInputs() on init here because PHP handles the initial state correctly.
-            // We only want to intervene if USER changes the type.
+             // Init check unnecessary if PHP handled it, but harmless
         }
     });
 </script>

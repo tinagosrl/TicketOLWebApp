@@ -10,7 +10,12 @@
             <div class="bg-white rounded-2xl shadow-xl overflow-hidden md:flex">
                 <!-- Left: Image & Info -->
                 <div class="md:w-1/2 lg:w-2/5 relative">
-                    <img src="https://placehold.co/800x1200?text={{ urlencode($event->name) }}" alt="{{ $event->name }}" class="w-full h-64 md:h-full object-cover">
+                    <img src="{{ $event->image_path ? Storage::url($event->image_path) : 'https://placehold.co/800x1200?text=' . urlencode($event->name) }}" alt="{{ $event->name }}" class="w-full h-64 md:h-full object-cover">
+                    <!-- Vertical Image Overlay Check (if exists, maybe prioritize?) -->
+                     @if($event->vertical_image_path)
+                        <img src="{{ Storage::url($event->vertical_image_path) }}" class="absolute inset-0 w-full h-full object-cover" alt="{{ $event->name }}">
+                     @endif
+
                     <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end md:hidden">
                         <div class="p-6 text-white">
                             <h1 class="text-3xl font-bold">{{ $event->name }}</h1>
@@ -25,6 +30,9 @@
                     </div>
 
                     <div class="flex flex-col space-y-4 text-gray-600 mb-8">
+                        <div class="prose prose-sm text-gray-500 mb-4">
+                            {{ $event->description }}
+                        </div>
 
                         @if($event->type == 'scheduled')
                         <div class="flex items-start">
@@ -39,18 +47,11 @@
                          <div class="flex items-start">
                             <svg class="w-6 h-6 mr-3 text-indigo-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                             <div>
-                                <span class="block font-semibold text-gray-900">{{ __('Valid until:') }} {{ $event->end_date->format('d M Y') }}</span>
+                                <span class="block font-semibold text-gray-900">{{ __('Valid until:') }} {{ $event->end_date ? $event->end_date->format('d M Y') : 'Unlimited' }}</span>
                             </div>
                         </div>
                         @endif
     
-                        <div class="flex items-start">
-                            <svg class="w-6 h-6 mr-3 text-indigo-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            <div>
-                                <span class="block font-semibold text-gray-900">{{ $event->start_date->format('l, d F Y') }}</span>
-                                
-                            </div>
-                        </div>
                         <div class="flex items-start">
                              <svg class="w-6 h-6 mr-3 text-indigo-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                             <div>
@@ -66,7 +67,7 @@
                         
                         <div class="space-y-4">
                             @foreach($event->ticketTypes as $ticketType)
-                                <div class="border rounded-lg p-4 {{ $ticketType->quantity > 0 ? 'hover:border-indigo-300' : 'opacity-60 bg-gray-50' }} transition-colors">
+                                <div class="border rounded-lg p-4 {{ ($ticketType->quantity == -1 || $ticketType->quantity > 0) ? 'hover:border-indigo-300' : 'opacity-60 bg-gray-50' }} transition-colors">
                                     <form action="{{ route('public.cart.store', ['domain' => $tenant->domain]) }}" method="POST" class="flex flex-col sm:flex-row items-center justify-between gap-4">
                                         @csrf
                                         <input type="hidden" name="ticket_type_id" value="{{ $ticketType->id }}">
@@ -74,18 +75,25 @@
                                         <div class="flex-grow">
                                             <div class="font-medium text-gray-900">{{ $ticketType->name }}</div>
                                             <div class="text-indigo-600 font-bold text-lg">€ {{ number_format($ticketType->price, 2) }}</div>
-                                            @if($ticketType->quantity <= 0)
+                                            @if($ticketType->min_purchase > 1)
+                                                 <div class="text-xs text-orange-600 font-medium mt-1">Min. Purchase: {{ $ticketType->min_purchase }}</div>
+                                            @endif
+
+                                            @if($ticketType->quantity != -1 && $ticketType->quantity <= 0)
                                                 <div class="text-red-500 text-xs font-bold uppercase mt-1">Sold Out</div>
                                             @endif
                                         </div>
 
-                                        @if($ticketType->quantity > 0)
+                                        @if($ticketType->quantity == -1 || $ticketType->quantity > 0)
                                             <div class="flex items-center space-x-3">
-                                                <select name="quantity" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm">
-                                                    @for($i = 1; $i <= min(10, $ticketType->quantity); $i++)
-                                                        <option value="{{ $i }}">{{ $i }}</option>
-                                                    @endfor
-                                                </select>
+                                                <!-- Quantity Input -->
+                                                <input type="number" 
+                                                       name="quantity" 
+                                                       value="{{ $ticketType->min_purchase > 1 ? $ticketType->min_purchase : 1 }}" 
+                                                       min="{{ $ticketType->min_purchase > 1 ? $ticketType->min_purchase : 1 }}" 
+                                                       @if($ticketType->quantity != -1) max="{{ $ticketType->quantity }}" @endif
+                                                       class="w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm text-center">
+                                                
                                                 <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 text-sm font-medium">
                                                     {{ __('Add') }}
                                                 </button>
