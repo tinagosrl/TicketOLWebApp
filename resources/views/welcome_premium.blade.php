@@ -51,18 +51,30 @@
                     ];
 
                     $styleKey = 'bronze';
-                    $lowerName = strtolower($plan->getTranslation('name'));
-                    if(str_contains($lowerName, 'gold') || str_contains($lowerName, 'oro')) $styleKey = 'gold';
-                    elseif(str_contains($lowerName, 'silver') || str_contains($lowerName, 'argento')) $styleKey = 'silver';
-                    elseif(str_contains($lowerName, 'platinum') || str_contains($lowerName, 'special') || $plan->is_recommended) $styleKey = 'platinum';
                     
-                    if ($styleKey === 'bronze' && $index > 0) {
-                         $keys = array_keys($styles);
-                         $styleKey = $keys[$index % count($keys)];
+                    // Improved Logic for Style Detection: Check both English/Italian or fallback to index
+                    $nameIt = strtolower($plan->getTranslation('name', 'it'));
+                    $nameEn = strtolower($plan->getTranslation('name', 'en'));
+                    
+                    if(str_contains($nameIt, 'gold') || str_contains($nameIt, 'oro') || str_contains($nameEn, 'gold')) {
+                         $styleKey = 'gold';
+                    } elseif(str_contains($nameIt, 'silver') || str_contains($nameIt, 'argento') || str_contains($nameEn, 'silver')) {
+                         $styleKey = 'silver';
+                    } elseif(str_contains($nameIt, 'platinum') || str_contains($nameIt, 'special') || str_contains($nameEn, 'platinum') || $plan->is_recommended) {
+                         $styleKey = 'platinum';
+                    } else {
+                        // Fallback: If 1st plan -> Bronze, 2nd -> Silver, 3rd -> Gold, 4th -> Platinum
+                        // This ensures consistency if names don't match
+                        $keys = array_keys($styles);
+                        $styleKey = $keys[$index % count($keys)];
                     }
 
                     $currentStyle = $styles[$styleKey];
                     $textColor = ($styleKey === 'bronze') ? 'text-yellow-100' : 'text-gray-900';
+                    $starColor = ($styleKey === 'bronze') ? 'text-yellow-700' : 'text-yellow-400'; // Default
+                    if ($styleKey === 'silver') $starColor = 'text-gray-400';
+                    if ($styleKey === 'gold') $starColor = 'text-yellow-500';
+                    if ($styleKey === 'platinum') $starColor = 'text-purple-400';
                     
                     // Button: Black with White Text
                     $btnStyle = 'bg-black text-white hover:bg-gray-800 border border-transparent';
@@ -72,10 +84,10 @@
                 <!-- Card Container - Overflow Visible for Star -->
                 <div class="relative rounded-xl p-1 {{ $currentStyle }} transform hover:scale-105 transition-transform duration-300 shadow-2xl flex flex-col mt-6">
                     
-                    <!-- Star Icon (Half In / Half Out) -->
+                    <!-- Star Icon (Half In / Half Out) - Color Matching Box -->
                     <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 z-20">
-                        <div class="bg-white p-2 rounded-full shadow-lg"> <!-- Optional white circle backing if needed, or remove -->
-                             <svg class="w-16 h-16 text-yellow-400 drop-shadow-md" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <div class="bg-white p-2 rounded-full shadow-lg border-2 border-gray-100">
+                             <svg class="w-16 h-16 {{ $starColor }} drop-shadow-sm" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                         </div>
                     </div>
 
@@ -88,7 +100,7 @@
                         </div>
                     @endif
 
-                    <div class="h-full bg-opacity-90 rounded-lg p-6 flex flex-col relative overflow-hidden flex-grow pt-10"> <!-- Added pt-10 for Star space -->
+                    <div class="h-full bg-opacity-90 rounded-lg p-6 flex flex-col relative overflow-hidden flex-grow pt-10">
                         
                         <div class="z-10 text-center flex-grow">
                             <h3 class="text-2xl font-black uppercase tracking-wider mb-2 {{ $textColor }}">{{ $plan->getTranslation('name') }}</h3>
