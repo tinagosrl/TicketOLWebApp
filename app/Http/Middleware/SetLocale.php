@@ -14,7 +14,8 @@ class SetLocale
         if (Session::has('locale')) {
             App::setLocale(Session::get('locale'));
         } else {
-             App::setLocale('en'); // Default
+             // Default language is Italian
+             App::setLocale('it'); 
         }
         return $next($request);
     }
