@@ -40,6 +40,11 @@ class Tenant extends Model
         return $this->hasMany(User::class);
     }
 
+    public function venues()
+    {
+        return $this->hasMany(Venue::class);
+    }
+
     // Helper to see if tenant has an active subscription
     public function hasActiveSubscription()
     {
