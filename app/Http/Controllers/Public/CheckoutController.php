@@ -51,11 +51,17 @@ class CheckoutController extends Controller
                     if (!$ticketType) {
                          throw new \Exception("Ticket type not found: {$item['id']}");
                     }
-                    if ($ticketType->quantity < $item['quantity']) {
-                        throw new \Exception("Not enough tickets available for {$ticketType->name}");
+                    
+                    // Check Quantity (if not unlimited)
+                    if ($ticketType->quantity != -1) {
+                        if ($ticketType->quantity < $item['quantity']) {
+                            throw new \Exception("Not enough tickets available for {$ticketType->name}");
+                        }
+                        // Reserve tickets (decrement)
+                        $ticketType->decrement('quantity', $item['quantity']);
                     }
-                    // Reserve tickets
-                    $ticketType->decrement('quantity', $item['quantity']);
+                    
+                    // Always increment sold count
                     $ticketType->increment('sold', $item['quantity']);
                 }
 

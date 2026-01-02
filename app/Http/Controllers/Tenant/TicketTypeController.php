@@ -16,7 +16,7 @@ class TicketTypeController extends Controller
             'event_id' => 'required|exists:events,id',
             'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
-            'quantity' => 'required|integer|min:1',
+            'quantity' => 'required|integer|min:0', // 0 means Unlimited
         ]);
 
         $event = Event::findOrFail($request->event_id);
@@ -24,7 +24,13 @@ class TicketTypeController extends Controller
         // Security check: ensure event belongs to tenant
         if ($event->tenant_id !== auth()->user()->tenant_id) abort(403);
 
-        $event->ticketTypes()->create($request->all());
+        $data = $request->all();
+        // Treat 0 as Unlimited (-1 in DB)
+        if ($request->quantity == 0) {
+            $data['quantity'] = -1;
+        }
+
+        $event->ticketTypes()->create($data);
 
         return back()->with('success', 'Ticket type added.');
     }

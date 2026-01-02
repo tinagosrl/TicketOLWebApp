@@ -110,7 +110,7 @@
                         <x-text-input id="price" class="block mt-1 w-full" type="number" step="0.01" name="price" required placeholder="10.00" />
                     </div>
                     <div class="w-32">
-                        <x-input-label for="quantity" :value="__('Quantity')" />
+                        <x-input-label for="quantity" :value="__('Quantity (0=Unlimited)')" />
                         <x-text-input id="quantity" class="block mt-1 w-full" type="number" name="quantity" required placeholder="100" />
                     </div>
                     <x-secondary-button type="submit" class="mb-0.5">
@@ -135,7 +135,13 @@
                                 <tr>
                                     <td class="px-4 py-2 text-sm text-gray-900">{{ $ticket->name }}</td>
                                     <td class="px-4 py-2 text-sm text-gray-500">€ {{ number_format($ticket->price, 2) }}</td>
-                                    <td class="px-4 py-2 text-sm text-gray-500">{{ $ticket->quantity - $ticket->sold }} / {{ $ticket->quantity }}</td>
+                                    <td class="px-4 py-2 text-sm text-gray-500">
+                                        @if($ticket->quantity == -1)
+                                            <span class="text-green-600 font-bold">Unlimited</span>
+                                        @else
+                                            {{ $ticket->quantity }}
+                                        @endif
+                                    </td>
                                     <td class="px-4 py-2 text-sm text-gray-500">{{ $ticket->sold }}</td>
                                     <td class="px-4 py-2 text-sm text-right">
                                         <form action="{{ route('tenant.ticket_types.destroy', $ticket) }}" method="POST" class="inline">
@@ -160,20 +166,14 @@
         const typeSelect = document.getElementById('type');
         const startDateInput = document.getElementById('start_date');
         const endDateInput = document.getElementById('end_date');
-        const endDateContainer = endDateInput.closest('div'); // Assuming wrapped in div
+        const endDateContainer = endDateInput.closest('div'); 
         
         function updateInputs() {
             const type = typeSelect.value;
             if (type === 'open') {
-                // Change to Date only
                 startDateInput.type = 'date';
                 endDateInput.type = 'date';
-                
-                // End Date Optional? Label logic?
-                // Let's keep it visible but ensure backend allows null.
-                // User said "if I don't put end date".
             } else {
-                // Scheduled: DateTime
                 startDateInput.type = 'datetime-local';
                 endDateInput.type = 'datetime-local';
             }
@@ -181,7 +181,7 @@
         
         if(typeSelect) {
             typeSelect.addEventListener('change', updateInputs);
-            updateInputs(); // Init
+            updateInputs(); 
         }
     });
 </script>
