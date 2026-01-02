@@ -101,7 +101,7 @@
 
                                     <!-- Features HTML List -->
                                     @if($plan->features_html)
-                                        <ul class="mt-6 space-y-4 text-sm text-gray-600">
+                                        <ul class="mt-6 space-y-4 text-sm text-gray-600 list-disc pl-5">
                                             {!! $plan->getTranslation('features_html') !!}
                                         </ul>
                                     @endif
