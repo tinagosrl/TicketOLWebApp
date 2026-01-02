@@ -31,6 +31,7 @@ class BrandingController extends Controller
             'favicon' => 'nullable|mimes:png,jpg,jpeg,ico|max:1024',
             'primary_color' => 'nullable|string|max:7',
             'app_name' => 'nullable|string|max:255',
+            'pricing_theme' => 'nullable|in:modern,premium', // Added validation
         ], $messages);
 
         if ($request->hasFile('logo')) {
@@ -49,6 +50,10 @@ class BrandingController extends Controller
         
         if ($request->app_name) {
              GlobalSetting::set('app_name', $request->app_name, 'branding');
+        }
+
+        if ($request->has('pricing_theme')) {
+             GlobalSetting::set('pricing_theme', $request->pricing_theme, 'branding');
         }
 
         return redirect()->back()->with('success', 'Branding aggiornato con successo.');

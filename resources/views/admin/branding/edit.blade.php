@@ -56,6 +56,23 @@
                                 </div>
                                 <x-input-error :messages="$errors->get('primary_color')" class="mt-2" />
                             </div>
+                            
+                            <!-- Pricing Theme (New) -->
+                            <div class="col-span-2 md:col-span-1 bg-gray-50 p-4 rounded-lg">
+                                <x-input-label for="pricing_theme" :value="__('Pricing Page Theme')" />
+                                <div class="mt-3 space-y-3">
+                                    <label class="flex items-center cursor-pointer">
+                                        <input type="radio" name="pricing_theme" value="modern" class="form-radio h-4 w-4 text-indigo-600 focus:ring-indigo-500" {{ ($settings['pricing_theme'] ?? 'modern') === 'modern' ? 'checked' : '' }}>
+                                        <span class="ml-2 text-sm text-gray-700 font-medium">Classic Modern (Light)</span>
+                                    </label>
+                                    <label class="flex items-center cursor-pointer">
+                                        <input type="radio" name="pricing_theme" value="premium" class="form-radio h-4 w-4 text-indigo-600 focus:ring-indigo-500" {{ ($settings['pricing_theme'] ?? 'modern') === 'premium' ? 'checked' : '' }}>
+                                        <span class="ml-2 text-sm text-white bg-black px-2 py-0.5 rounded font-bold border border-yellow-500">Premium Dark (Gold/Silver)</span>
+                                    </label>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-2">Scegli il layout della home page.</p>
+                            </div>
+
                         </div>
 
                         <div class="flex items-center justify-end mt-4">
