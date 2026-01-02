@@ -84,7 +84,20 @@
                                 <x-input-label for="max_subadmins" :value="__('Max SubAdmins')" />
                                 <x-text-input id="max_subadmins" class="block mt-1 w-full" type="number" name="max_subadmins" :value="$plan->max_subadmins" required />
                             </div>
-                             <div>
+
+                            <!-- Application Fee -->
+                            <div class="col-span-2 md:col-span-1 bg-yellow-50 p-3 rounded border border-yellow-200">
+                                <x-input-label for="application_fee_percent" :value="__('Application Fee (%)')" />
+                                <div class="flex items-center">
+                                    <x-text-input id="application_fee_percent" class="block mt-1 w-full" type="number" step="0.01" min="0" max="100" name="application_fee_percent" :value="$plan->application_fee_percent" required />
+                                    <span class="ml-2 text-gray-600">%</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    {{ __('Percentuale trattenuta dalla piattaforma su ogni biglietto venduto.') }}
+                                </p>
+                            </div>
+
+                             <div class="md:col-span-1">
                                 <x-input-label for="position" :value="__('Display Position')" />
                                 <x-text-input id="position" class="block mt-1 w-full" type="number" name="position" :value="$plan->position" />
                             </div>
