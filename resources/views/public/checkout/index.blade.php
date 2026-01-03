@@ -1,52 +1,130 @@
-<x-guest-layout>
-    <div class="py-12 bg-gray-50">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+<x-tenant-shop-layout>
+    <div class="py-12 bg-gray-50 min-h-screen">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 px-4">
             <h1 class="text-3xl font-bold mb-8 text-gray-900">{{ __('Checkout') }}</h1>
 
-            <form action="{{ route('public.shop.checkout.store', ['domain' => request()->route('domain')]) }}" method="POST">
-                @csrf
-                <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
-                    <div class="px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-200">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900">{{ __('Contact Information') }}</h3>
-                        <p class="mt-1 max-w-2xl text-sm text-gray-500">{{ __('Where should we send your tickets?') }}</p>
-                    </div>
-                    <div class="px-4 py-5 sm:p-6 space-y-6">
-                        <div class="grid grid-cols-6 gap-6">
-                            <div class="col-span-6 sm:col-span-3">
-                                <label for="customer_name" class="block text-sm font-medium text-gray-700">{{ __('Full Name') }}</label>
-                                <input type="text" name="customer_name" id="customer_name" required class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                            </div>
-
-                            <div class="col-span-6 sm:col-span-3">
-                                <label for="customer_email" class="block text-sm font-medium text-gray-700">{{ __('Email Address') }}</label>
-                                <input type="email" name="customer_email" id="customer_email" required class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                            </div>
-                        </div>
+            <div class="flex flex-col lg:flex-row gap-8">
+                
+                <!-- Left Column: Form -->
+                <div class="w-full lg:w-2/3">
+                    <form action="{{ route('public.shop.checkout.store', ['domain' => request()->route('domain')]) }}" method="POST" id="checkout-form">
+                        @csrf
                         
-                         <!-- Group Ticket Option -->
-                        <div class="mt-4">
-                            <div class="relative flex items-start">
-                                <div class="flex items-center h-5">
-                                    <input id="consolidate_tickets" name="consolidate_tickets" type="checkbox" value="1" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
-                                </div>
-                                <div class="ml-3 text-sm">
-                                    <label for="consolidate_tickets" class="font-medium text-gray-700">{{ __("Single Group Ticket") }}</label>
-                                    <p class="text-gray-500">{{ __("Generate one QR code per ticket type for the entire group (e.g., 1 ticket valid for 5 entries).") }}</p>
+                        <!-- Contact Info Card -->
+                        <div class="bg-white overflow-hidden shadow-sm rounded-xl mb-6">
+                            <div class="p-6 border-b border-gray-100 bg-gray-50/50">
+                                <h3 class="text-lg font-semibold text-gray-900">{{ __('Contact Information') }}</h3>
+                                <p class="mt-1 text-sm text-gray-500">{{ __('Where should we send your tickets?') }}</p>
+                            </div>
+                            <div class="p-6 space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Full Name') }}</label>
+                                        <input type="text" name="customer_name" id="customer_name" required 
+                                               class="w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                                               placeholder="Mario Rossi">
+                                    </div>
+
+                                    <div>
+                                        <label for="customer_email" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Email Address') }}</label>
+                                        <input type="email" name="customer_email" id="customer_email" required 
+                                               class="w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                                               placeholder="mario@example.com">
+                                    </div>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- Options Card -->
+                        <div class="bg-white overflow-hidden shadow-sm rounded-xl mb-6">
+                            <div class="p-6">
+                                <label class="flex items-start space-x-3 cursor-pointer group">
+                                    <div class="flex items-center h-5">
+                                        <input id="consolidate_tickets" name="consolidate_tickets" type="checkbox" value="1" 
+                                               class="h-5 w-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 transition-colors"
+                                               style="color: {{ $tenant->primary_color ?? '#4f46e5' }}">
+                                    </div>
+                                    <div class="flex-1">
+                                        <span class="block font-medium text-gray-900 group-hover:text-indigo-600 transition-colors">{{ __("Single Group Ticket") }}</span>
+                                        <span class="block text-sm text-gray-500 mt-1">{{ __("Generate one QR code per ticket type for the entire group (e.g., 1 ticket valid for 5 entries).") }}</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Mobile Actions (Hidden on Desktop, shown at bottom of form) -->
+                        <div class="lg:hidden mt-6">
+                            <button type="submit" 
+                                    class="w-full flex justify-center py-4 px-4 border border-transparent rounded-lg shadow-sm text-lg font-bold text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
+                                    style="background-color: {{ $tenant->primary_color ?? '#4f46e5' }}">
+                                {{ __('Complete Order') }} • € {{ number_format($total, 2) }}
+                            </button>
+                             <div class="mt-4 text-center">
+                                <a href="{{ route('public.cart.index', ['domain' => request()->route('domain')]) }}" class="text-gray-500 hover:text-gray-700 text-sm font-medium">
+                                    &larr; {{ __('Back to Cart') }}
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Right Column: Order Summary (Sticky) -->
+                <div class="w-full lg:w-1/3">
+                    <div class="bg-white rounded-xl shadow-sm p-6 sticky top-6">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-4 border-b border-gray-100">{{ __('Order Summary') }}</h2>
+                        
+                        <div class="space-y-4 mb-6 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+                            @foreach($items as $item)
+                                <div class="flex justify-between items-start text-sm">
+                                    <div class="flex-1 pr-4">
+                                        <div class="font-medium text-gray-900">{{ $item['event_name'] }}</div>
+                                        <div class="text-gray-500">{{ $item['name'] }}</div>
+                                        <div class="text-xs text-gray-400 mt-0.5">Qty: {{ $item['quantity'] }}</div>
+                                    </div>
+                                    <div class="font-medium text-gray-900 whitespace-nowrap">
+                                        € {{ number_format($item['price'] * $item['quantity'], 2) }}
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <div class="border-t border-gray-100 pt-4 mb-6">
+                            <div class="flex justify-between items-center text-gray-600 mb-2">
+                                <span>{{ __('Subtotal') }}</span>
+                                <span>€ {{ number_format($total, 2) }}</span>
+                            </div>
+                            <div class="flex justify-between items-end mt-4">
+                                <span class="text-xl font-bold text-gray-900">{{ __('Total') }}</span>
+                                <div class="text-right">
+                                    <span class="block text-2xl font-bold" style="color: {{ $tenant->primary_color ?? '#111827' }}">€ {{ number_format($total, 2) }}</span>
+                                    <span class="text-xs text-gray-400 font-normal">EUR</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Desktop Actions -->
+                        <div class="hidden lg:block">
+                            <button type="submit" form="checkout-form"
+                                    class="w-full flex justify-center py-4 px-4 border border-transparent rounded-lg shadow-sm text-lg font-bold text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all shadow-lg"
+                                    style="background-color: {{ $tenant->primary_color ?? '#4f46e5' }}">
+                                {{ __('Complete Order') }}
+                            </button>
+                            
+                            <div class="mt-4 text-center">
+                                <a href="{{ route('public.cart.index', ['domain' => request()->route('domain')]) }}" class="text-gray-400 hover:text-gray-600 text-sm transition-colors">
+                                    &larr; {{ __('Back to Cart') }}
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 flex items-center justify-center space-x-2 text-gray-300">
+                             <svg class="h-6 w-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                             <span class="text-xs">{{ __('Secure encrypted payment') }}</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex justify-end">
-                    <a href="{{ route('public.cart.index', ['domain' => request()->route('domain')]) }}" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mr-3">
-                        {{ __('Back to Cart') }}
-                    </a>
-                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        {{ __('Complete Order') }}
-                    </button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
-</x-guest-layout>
+</x-tenant-shop-layout>
