@@ -10,6 +10,35 @@
                     <form action="{{ route('public.shop.checkout.store', ['domain' => request()->route('domain')]) }}" method="POST" id="checkout-form">
                         @csrf
                         
+                        <!-- Error Alert -->
+                        @if (session('error'))
+                            <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        <h3 class="text-sm font-medium text-red-800">{{ __('There was an error processing your order.') }}</h3>
+                                        <div class="mt-2 text-sm text-red-700">
+                                            <p>{{ session('error') }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if ($errors->any())
+                            <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
+                                <ul class="list-disc pl-5 text-sm text-red-700">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                        
                         <!-- Contact Info Card -->
                         <div class="bg-white overflow-hidden shadow-sm rounded-xl mb-6">
                             <div class="p-6 border-b border-gray-100 bg-gray-50/50">
@@ -21,15 +50,23 @@
                                     <div>
                                         <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Full Name') }}</label>
                                         <input type="text" name="customer_name" id="customer_name" required 
-                                               class="w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                                               value="{{ old('customer_name') }}"
+                                               class="w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors @error('customer_name') border-red-500 @enderror"
                                                placeholder="Mario Rossi">
+                                        @error('customer_name')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
                                     </div>
 
                                     <div>
                                         <label for="customer_email" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Email Address') }}</label>
                                         <input type="email" name="customer_email" id="customer_email" required 
-                                               class="w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                                               value="{{ old('customer_email') }}"
+                                               class="w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors @error('customer_email') border-red-500 @enderror"
                                                placeholder="mario@example.com">
+                                        @error('customer_email')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
                                     </div>
                                 </div>
                             </div>

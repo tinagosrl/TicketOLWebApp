@@ -9,15 +9,25 @@ use App\Models\Tenant;
 
 class PaymentService
 {
+    // Constructor removed to prevent early failure if config is missing
+    /*
     public function __construct()
     {
         Stripe::setApiKey(config('services.stripe.secret'));
     }
+    */
 
     public function createCheckoutSession(Order $order, Tenant $tenant)
     {
+        // Lazy load API Key
+        $apiKey = config('services.stripe.secret');
+        if (!$apiKey) {
+             throw new \Exception('Stripe Secret Key not configured in system settings.');
+        }
+        Stripe::setApiKey($apiKey);
+
         if (!$tenant->stripe_account_id) {
-            throw new \Exception('Il venditore non ha ancora configurato i pagamenti.');
+            throw new \Exception('Il venditore non ha ancora configurato i pagamenti (Stripe Connect).');
         }
 
         // Calculate Application Fee
@@ -61,8 +71,8 @@ class PaymentService
             'payment_method_types' => ['card'],
             'line_items' => $lineItems,
             'mode' => 'payment',
-            'success_url' => route('public.shop.checkout.success', ['reference' => $order->reference_no, 'session_id' => '{CHECKOUT_SESSION_ID}']),
-            'cancel_url' => route('public.cart.index'),
+            'success_url' => route('public.shop.checkout.success', ['domain' => $tenant->domain, 'reference' => $order->reference_no, 'session_id' => '{CHECKOUT_SESSION_ID}']),
+            'cancel_url' => route('public.cart.index', ['domain' => $tenant->domain]),
             'payment_intent_data' => array_merge([
                 // Metadata for tracking
                 'metadata' => [
