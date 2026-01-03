@@ -55,7 +55,7 @@
                                             </span>
                                         </div>
                                         <span class="block text-sm text-gray-600 mt-1">
-                                            {{ __("Save paper and hassle! Generate one single QR code for the entire group.") }}
+                                            {{ __("Save paper and hassle! Generate one single QR code for the entire group.") }} {{ __("If you need separate tickets, uncheck the box.") }}
                                         </span>
                                     </div>
                                 </label>
