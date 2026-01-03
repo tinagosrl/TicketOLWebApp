@@ -100,9 +100,10 @@ class CheckoutController extends Controller
                 }
             });
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Checkout Error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Checkout failed: ' . $e->getMessage());
+            // CRITICAL: withInput() prevents form reset
+            return redirect()->back()->withInput()->with('error', 'Checkout failed: ' . $e->getMessage());
         }
     }
 
