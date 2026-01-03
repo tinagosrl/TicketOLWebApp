@@ -31,7 +31,7 @@ class CheckoutController extends Controller
         $cart = Session::get('cart', []);
 
         if (empty($cart)) {
-            return redirect()->route('public.shop.index')->with('error', 'Your cart is empty.');
+            return redirect()->route('public.shop.index', ['domain' => request()->route('domain')])->with('error', 'Your cart is empty.');
         }
 
         $request->validate([
@@ -76,18 +76,6 @@ class CheckoutController extends Controller
                     'status' => 'pending', 
                 ]);
 
-                // Store consolidation preference in order (optional, but good for reference if we add meta later)
-                // For now we just use it during finalizeOrder via request or param.
-                // Since finalize can happen independently (webhook), we should prob store it.
-                // But for MVP we assume success immediately or simple redirect.
-                // FIX: Let's store it in session flash or just re-determine (cannot redo safely).
-                // BETTER: Store 'notes' or 'metadata' in Order table. 
-                // Using session for now as Stripe webhook is separate and won't have request data.
-                // Actually `finalizeOrder` generates tickets. Stripe webhook logic in `CheckoutController`
-                // doesn't have access to `consolidate_tickets`.
-                // WE MUST CREATE TICKETS AFTER PAYMENT SUCCESS usually.
-                // However, for this MVP, I'll pass the param through Session for the redirect flow.
-                // For valid Webhook flow, we'd default to separate tickets if not stored.
                 if ($request->has('consolidate_tickets')) {
                     Session::put('consolidate_tickets_' . $order->id, true);
                 }
@@ -190,6 +178,6 @@ class CheckoutController extends Controller
             return view('public.checkout.success', compact('order', 'tenant'));
         }
         
-        return redirect()->route('public.shop.checkout.success', $order->reference_no);
+        return redirect()->route('public.shop.checkout.success', ['domain' => $order->tenant->domain, 'reference' => $order->reference_no]);
     }
 }
