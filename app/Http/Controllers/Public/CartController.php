@@ -24,7 +24,8 @@ class CartController extends Controller
             $items[] = $details;
         }
 
-        return view('public.cart.index', compact('items', 'total'));
+        $tenant = app('tenant');
+        return view('public.cart.index', compact('items', 'total', 'tenant'));
     }
 
     /**
@@ -91,9 +92,23 @@ class CartController extends Controller
     public function checkout()
     {
         $cart = Session::get('cart', []);
+        
         if (empty($cart)) {
             return redirect()->route('public.shop.index', ['domain' => request()->route('domain')]);
         }
-        return view('public.checkout.index');
+
+        $total = 0;
+        $items = [];
+        foreach ($cart as $details) {
+            $total += $details['price'] * $details['quantity'];
+            $items[] = $details;
+        }
+
+        return view('public.checkout.index', [
+            'tenant' => app('tenant'),
+            'cart' => $cart,
+            'items' => $items,
+            'total' => $total
+        ]);
     }
 }
