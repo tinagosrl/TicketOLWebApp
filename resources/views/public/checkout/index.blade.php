@@ -35,18 +35,28 @@
                             </div>
                         </div>
 
-                        <!-- Options Card -->
-                        <div class="bg-white overflow-hidden shadow-sm rounded-xl mb-6">
+                        <!-- Options Card (Eco-Friendly Highlight) -->
+                        <div class="bg-gradient-to-r from-green-50 to-white border border-green-100 overflow-hidden shadow-sm rounded-xl mb-6 relative">
+                            <div class="absolute top-0 right-0 p-2">
+                                <svg class="w-12 h-12 text-green-100 transform rotate-12" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+                            </div>
                             <div class="p-6">
-                                <label class="flex items-start space-x-3 cursor-pointer group">
+                                <label class="flex items-start space-x-3 cursor-pointer group relative z-10">
                                     <div class="flex items-center h-5">
-                                        <input id="consolidate_tickets" name="consolidate_tickets" type="checkbox" value="1" 
-                                               class="h-5 w-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 transition-colors"
-                                               style="color: {{ $tenant->primary_color ?? '#4f46e5' }}">
+                                        <input id="consolidate_tickets" name="consolidate_tickets" type="checkbox" value="1" checked 
+                                               class="h-5 w-5 text-green-600 border-gray-300 rounded focus:ring-green-500 transition-colors">
                                     </div>
                                     <div class="flex-1">
-                                        <span class="block font-medium text-gray-900 group-hover:text-indigo-600 transition-colors">{{ __("Single Group Ticket") }}</span>
-                                        <span class="block text-sm text-gray-500 mt-1">{{ __("Generate one QR code per ticket type for the entire group (e.g., 1 ticket valid for 5 entries).") }}</span>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="block font-bold text-gray-900 group-hover:text-green-700 transition-colors">{{ __("Single Group Ticket") }}</span>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                <svg class="mr-1.5 h-2 w-2 text-green-400" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3" /></svg>
+                                                {{ __('Eco Choice 🌿') }}
+                                            </span>
+                                        </div>
+                                        <span class="block text-sm text-gray-600 mt-1">
+                                            {{ __("Save paper and hassle! Generate one single QR code for the entire group.") }}
+                                        </span>
                                     </div>
                                 </label>
                             </div>
