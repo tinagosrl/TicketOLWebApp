@@ -48,11 +48,9 @@
 
                         <div class="mt-8 flex justify-between items-center">
                             <a href="{{ route('public.shop.index', ['domain' => request()->route('domain')]) }}" class="text-indigo-600 hover:text-indigo-900">&larr; {{ __('Continue Shopping') }}</a>
-                            <form action="{{ route('public.shop.checkout.store', ['domain' => request()->route('domain')]) }}" method="POST" class="w-full md:w-auto">
-                                @csrf
-                                <!-- Checkout form or redirect to checkout page -->
-                                <!-- For simplicity, let's create a dedicated checkout page next, but for now button is fine -->
-                                 <a href="{{ route('public.checkout.index', ['domain' => request()->route('domain')]) }}" class="bg-gray-800 text-white px-6 py-3 rounded-md hover:bg-gray-700 ml-4">
+                            <form action="{{ route('public.shop.checkout.index', ['domain' => request()->route('domain')]) }}" method="GET" class="w-full md:w-auto">
+                                <!-- Checkout button as link -->
+                                 <a href="{{ route('public.shop.checkout.index', ['domain' => request()->route('domain')]) }}" class="bg-gray-800 text-white px-6 py-3 rounded-md hover:bg-gray-700 ml-4">
                                     {{ __('Proceed to Checkout') }}
                                 </a>
                             </form>
