@@ -2,7 +2,7 @@
     <div class="py-12 bg-gray-50 min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="text-center mb-12">
-                <h1 class="text-4xl font-extrabold text-gray-900 sm:text-5xl md:text-6xl text-indigo-600">
+                <h1 class="text-4xl font-extrabold text-gray-900 sm:text-5xl md:text-6xl" style="color: {{ $tenant->primary_color ?? '#4f46e5' }}">
                     {{ $tenant->name }}
                 </h1>
                 <h2 class="mt-4 text-2xl text-gray-700 font-semibold">{{ __('Upcoming Events') }}</h2>
@@ -18,8 +18,12 @@
                             {{-- Image Logic --}}
                             <div class="h-48 bg-gray-200 w-full relative">
                                 <img src="{{ $event->image_path ? Storage::url($event->image_path) : 'https://placehold.co/600x400?text=' . urlencode($event->name) }}" alt="{{ $event->name }}" class="w-full h-full object-cover">
-                                <div class="absolute top-0 right-0 bg-indigo-600 text-white px-3 py-1 rounded-bl-lg text-sm font-bold">
-                                    {{ $event->start_date->format('d M') }}
+                                <div class="absolute top-0 right-0 text-white px-3 py-1 rounded-bl-lg text-sm font-bold" style="background-color: {{ $tenant->primary_color ?? '#4f46e5' }}">
+                                    @if($event->type == 'scheduled')
+                                        {{ $event->start_date->format('d M') }}
+                                    @else
+                                        {{ __('Open') }}
+                                    @endif
                                 </div>
                             </div>
                             
@@ -27,22 +31,33 @@
                                 <div>
                                     <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ $event->name }}</h3>
                                     <div class="text-gray-600 text-sm mb-4">
-
+                                        
+                                        <!-- Date Logic Simplified for Grid -->
                                         @if($event->type == 'scheduled')
                                             <div class="flex items-center mb-1">
                                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                                 <span class='mr-1'>{{ __('Start:') }}</span> {{ $event->start_date->format('H:i') }}
                                             </div>
+                                        @else
+                                             <div class="flex items-center mb-1">
+                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                                @if($event->end_date)
+                                                    {{ __('Until:') }} {{ $event->end_date->format('d M Y') }}
+                                                @else
+                                                    {{ __('Always Open') }}
+                                                @endif
+                                            </div>
                                         @endif
-                                        
                                         
                                         <div class="flex items-center">
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                            {{ $event->venue->name ?? 'Venue' }}
+                                            {{ $event->venue->name ?? __('Venue') }}
                                         </div>
                                     </div>
                                 </div>
-                                <a href="{{ route('public.shop.show', ['domain' => $tenant->domain, 'slug' => $event->slug]) }}" class="mt-4 w-full block text-center bg-gray-900 border border-transparent rounded-md py-2 px-4 text-white font-medium hover:bg-gray-800">
+                                <a href="{{ route('public.shop.show', ['domain' => $tenant->domain, 'slug' => $event->slug]) }}" 
+                                   style="background-color: {{ $tenant->secondary_color ?? '#111827' }}; color: {{ $tenant->text_color ?? '#ffffff' }}"
+                                   class="mt-4 w-full block text-center border border-transparent rounded-md py-2 px-4 font-medium hover:opacity-90 transition-opacity">
                                     {{ __('View Details') }} &rarr;
                                 </a>
                             </div>
@@ -66,7 +81,7 @@
                             @if(isset($tenant->venues) && $tenant->venues->count() > 0)
                                 @foreach($tenant->venues as $v)
                                     <div>
-                                        <h3 class="text-xl font-semibold text-indigo-600 mb-2">{{ $v->name }}</h3>
+                                        <h3 class="text-xl font-semibold mb-2" style="color: {{ $tenant->primary_color ?? '#4f46e5' }}">{{ $v->name }}</h3>
                                         <p class="text-gray-600">{{ $v->address }}, {{ $v->city }}</p>
                                         
                                         @if($v->opening_hours)

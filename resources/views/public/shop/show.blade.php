@@ -2,7 +2,9 @@
     <div class="py-12 bg-gray-50 min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="mb-6">
-                <a href="{{ route('public.shop.index', ['domain' => $tenant->domain]) }}" class="text-indigo-600 hover:text-indigo-800 flex items-center">
+                <a href="{{ route('public.shop.index', ['domain' => $tenant->domain]) }}" 
+                   style="color: {{ $tenant->primary_color ?? '#4f46e5' }}"
+                   class="hover:text-opacity-80 flex items-center font-medium">
                     &larr; {{ __('Back to Events') }}
                 </a>
             </div>
@@ -11,7 +13,7 @@
                 <!-- Left: Image & Info -->
                 <div class="md:w-1/2 lg:w-2/5 relative">
                     <img src="{{ $event->image_path ? Storage::url($event->image_path) : 'https://placehold.co/800x1200?text=' . urlencode($event->name) }}" alt="{{ $event->name }}" class="w-full h-64 md:h-full object-cover">
-                    <!-- Vertical Image Overlay Check (if exists, maybe prioritize?) -->
+                    <!-- Vertical Image Overlay Check -->
                      @if($event->vertical_image_path)
                         <img src="{{ Storage::url($event->vertical_image_path) }}" class="absolute inset-0 w-full h-full object-cover" alt="{{ $event->name }}">
                      @endif
@@ -34,28 +36,38 @@
                             {{ $event->description }}
                         </div>
 
+                        <!-- Date Display Logic -->
                         @if($event->type == 'scheduled')
-                        <div class="flex items-start">
-                            <svg class="w-6 h-6 mr-3 text-indigo-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            <div>
-                                <span class="block font-semibold text-gray-900">{{ $event->start_date->format('l, d F Y') }}</span>
-                                <span class="block text-sm">{{ $event->start_date->format('H:i') }} - {{ $event->end_date->format('H:i') }}</span>
+                            <div class="flex items-start">
+                                <svg class="w-6 h-6 mr-3 mt-0.5" style="color: {{ $tenant->primary_color ?? '#6366f1' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                <div>
+                                    <span class="block font-semibold text-gray-900">{{ $event->start_date->isoFormat('dddd D MMMM YYYY') }}</span>
+                                    <span class="block text-sm">{{ $event->start_date->format('H:i') }} - {{ $event->end_date->format('H:i') }}</span>
+                                </div>
                             </div>
-                        </div>
                         @else
-                        <!-- Open Access Date Display -->
-                         <div class="flex items-start">
-                            <svg class="w-6 h-6 mr-3 text-indigo-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            <div>
-                                <span class="block font-semibold text-gray-900">{{ __('Valid until:') }} {{ $event->end_date ? $event->end_date->format('d M Y') : 'Unlimited' }}</span>
+                            <!-- Open Access Logic -->
+                             <div class="flex items-start">
+                                <svg class="w-6 h-6 mr-3 mt-0.5" style="color: {{ $tenant->primary_color ?? '#6366f1' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                <div>
+                                    @if($event->end_date)
+                                        <span class="block font-semibold text-gray-900">
+                                            {{ __('From') }} {{ $event->start_date->isoFormat('D MMMM YYYY') }} 
+                                            {{ __('to') }} {{ $event->end_date->isoFormat('D MMMM YYYY') }}
+                                        </span>
+                                    @else
+                                        <span class="block font-semibold text-gray-900">
+                                            {{ __('From') }} {{ $event->start_date->isoFormat('D MMMM YYYY') }} - <span class="uppercase text-green-600 font-bold">{{ __('Always Open') }}</span>
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
-                        </div>
                         @endif
     
                         <div class="flex items-start">
-                             <svg class="w-6 h-6 mr-3 text-indigo-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                             <svg class="w-6 h-6 mr-3 mt-0.5" style="color: {{ $tenant->primary_color ?? '#6366f1' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                             <div>
-                                <span class="block font-semibold text-gray-900">{{ $event->venue->name ?? 'Venue' }}</span>
+                                <span class="block font-semibold text-gray-900">{{ $event->venue->name ?? __('Venue') }}</span>
                                 <span class="block text-sm">{{ $event->venue->address ?? '' }}</span>
                                 <span class="block text-sm">{{ $event->venue->city ?? '' }}</span>
                             </div>
@@ -74,19 +86,18 @@
                                         
                                         <div class="flex-grow">
                                             <div class="font-medium text-gray-900">{{ $ticketType->name }}</div>
-                                            <div class="text-indigo-600 font-bold text-lg">€ {{ number_format($ticketType->price, 2) }}</div>
+                                            <div class="font-bold text-lg" style="color: {{ $tenant->primary_color ?? '#4f46e5' }}">€ {{ number_format($ticketType->price, 2) }}</div>
                                             @if($ticketType->min_purchase > 1)
-                                                 <div class="text-xs text-orange-600 font-medium mt-1">Min. Purchase: {{ $ticketType->min_purchase }}</div>
+                                                 <div class="text-xs text-orange-600 font-medium mt-1">{{ __('Min. Purchase:') }} {{ $ticketType->min_purchase }}</div>
                                             @endif
 
                                             @if($ticketType->quantity != -1 && $ticketType->quantity <= 0)
-                                                <div class="text-red-500 text-xs font-bold uppercase mt-1">Sold Out</div>
+                                                <div class="text-red-500 text-xs font-bold uppercase mt-1">{{ __('Sold Out') }}</div>
                                             @endif
                                         </div>
 
                                         @if($ticketType->quantity == -1 || $ticketType->quantity > 0)
                                             <div class="flex items-center space-x-3">
-                                                <!-- Quantity Input -->
                                                 <input type="number" 
                                                        name="quantity" 
                                                        value="{{ $ticketType->min_purchase > 1 ? $ticketType->min_purchase : 1 }}" 
@@ -94,7 +105,9 @@
                                                        @if($ticketType->quantity != -1) max="{{ $ticketType->quantity }}" @endif
                                                        class="w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm text-center">
                                                 
-                                                <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 text-sm font-medium">
+                                                <button type="submit" 
+                                                        style="background-color: {{ $tenant->primary_color ?? '#4f46e5' }}"
+                                                        class="text-white px-4 py-2 rounded-md hover:opacity-90 text-sm font-medium transition-opacity">
                                                     {{ __('Add') }}
                                                 </button>
                                             </div>
