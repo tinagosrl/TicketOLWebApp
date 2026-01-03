@@ -67,13 +67,13 @@ class CartController extends Controller
 
         Session::put('cart', $cart);
 
-        return redirect()->route('public.cart.index')->with('success', 'Ticket added to cart!');
+        return redirect()->route('public.cart.index', ['domain' => $request->route('domain')])->with('success', 'Ticket added to cart!');
     }
 
     /**
      * Remove an item from the cart.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $cart = Session::get('cart', []);
 
@@ -92,7 +92,7 @@ class CartController extends Controller
     {
         $cart = Session::get('cart', []);
         if (empty($cart)) {
-            return redirect()->route('public.shop.index');
+            return redirect()->route('public.shop.index', ['domain' => request()->route('domain')]);
         }
         return view('public.checkout.index');
     }
